@@ -82,9 +82,4 @@ public class TreeTest extends DBUnitTest {
 		assertThat(dao.getSubtree(1)).hasSize(0);
 	}
 	
-
-	public static void main(String[] args) {
-		WrService wr = new WrService();
-		wr.getAllTrees();
-	}
 }

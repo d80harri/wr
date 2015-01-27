@@ -9,24 +9,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<?scenebuilder-classpath-element ../../../../target/classes?>
-<?import javafx.scene.control.TreeTableColumn?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
 
-<BorderPane layoutX="0.0" layoutY="0.0" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.d80harri.wr.ui.FXMLController">
+<fx:root type="javafx.scene.layout.BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
   <center>
     <SplitPane dividerPositions="0.5" focusTraversable="true" prefHeight="160.0" prefWidth="200.0">
       <items>
         <TreeTableView fx:id="tree" prefHeight="574.0" prefWidth="100.0" >
         	<columns>
-        		<TreeTableColumn fx:id="titleColumn" text="Title"/>
+        		<TreeTableColumn fx:id="titleColumn" text="Title" minWidth="300"/>
         	</columns>
         </TreeTableView>
         <VBox prefHeight="200.0" prefWidth="194.0">
           <children>
           	<TaskView fx:id="taskView" layoutX="5.0" layoutY="4.0">
           	</TaskView>
-          	<TextField text="${dummy}"/>
           </children>
         </VBox>
       </items>
@@ -37,12 +35,12 @@
       <menus>
         <Menu mnemonicParsing="false" text="Edit">
           <items>
-            <MenuItem id="" fx:id="menuDeleteSubtree" mnemonicParsing="false" onAction="#deleteSubTree" text="Delete Subtree">
+            <MenuItem id="" fx:id="menuDeleteSubtree" mnemonicParsing="false" text="Delete Subtree">
               <accelerator>
                 <KeyCodeCombination alt="DOWN" code="D" control="UP" meta="UP" shift="UP" shortcut="UP" />
               </accelerator>
             </MenuItem>
-            <MenuItem id="" fx:id="menuAppendChild" mnemonicParsing="false" onAction="#appendChild" text="Append Child">
+            <MenuItem id="" fx:id="menuAppendChild" mnemonicParsing="false" text="Append Child" >
               <accelerator>
                 <KeyCodeCombination alt="DOWN" code="A" control="UP" meta="UP" shift="UP" shortcut="UP" />
               </accelerator>
@@ -52,4 +50,4 @@
       </menus>
     </MenuBar>
   </top>
-</BorderPane>
+</fx:root>

@@ -1,24 +1,18 @@
 package net.d80harri.wr.ui;
 
-import java.util.LinkedList;
+import net.d80harri.wr.db.SessionHandler;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import net.d80harri.wr.db.SessionHandler;
-import net.d80harri.wr.service.WrService;
-import net.d80harri.wr.service.model.TaskDto;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 
 public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
@@ -37,6 +31,7 @@ public class MainApp extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+    	SessionHandler.configure("jdbc:h2:~/prod;AUTO_SERVER=true");
         launch(args);
     }
 

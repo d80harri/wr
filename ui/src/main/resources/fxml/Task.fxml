@@ -11,7 +11,7 @@
 
 <fx:root type="javafx.scene.layout.VBox" xmlns:fx="http://javafx.com/fxml" >
   <children>
-    <TextField fx:id="title" minHeight="30.0" prefHeight="50.0" prefWidth="200.0" promptText="Title" text="${controller.test}" />
+    <TextField fx:id="title" minHeight="30.0" prefHeight="50.0" prefWidth="200.0" promptText="Title" />
     <HBox minHeight="-1.0" prefHeight="20.0" prefWidth="200.0" >
       <children>
         <ChoiceBox>

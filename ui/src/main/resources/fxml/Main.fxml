@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.d80harri.wr.ui.*?>
+<?import javafx.collections.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.layout.*?>
+<?scenebuilder-classpath-element ../../../../target/classes?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TextField?>
+<?import net.d80harri.wr.ui.ApplicationView?>
+
+<BorderPane layoutX="0.0" layoutY="0.0" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
+  <center>
+	<ApplicationView />
+  </center>
+  <top>
+  </top>
+</BorderPane>

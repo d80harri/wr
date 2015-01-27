@@ -43,6 +43,10 @@ public class TaskDto {
 		return title;
 	}
 	
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	
 	public String getContent() {
 		return content;
 	}
@@ -62,6 +66,10 @@ public class TaskDto {
 		}
 	}
 
+	public TaskDto getParent() {
+		return parent;
+	}
+	
 	public void setParent(TaskDto parent) {
 		if (this.parent != parent) {
 			this.parent = parent;
