@@ -1,7 +1,10 @@
 package net.d80harri.wr.ui.viewmodel;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.property.adapter.JavaBeanStringPropertyBuilder;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
 
@@ -12,18 +15,16 @@ public class TaskViewModel {
 	
 	public TaskViewModel(TaskDto dto) {
 		this.task = dto;
+		initialize();
 	}
 	
-	private StringProperty title = null;;
+	public void initialize() {
+		title.addListener((obs, o, n) -> task.setTitle(n)); 
+	}
+	
+	private final StringProperty title = new SimpleStringProperty();
 
 	public StringProperty titleProperty() {
-		if (title == null) {
-			try {
-				title = new JavaBeanStringPropertyBuilder().bean(task).name("title").build();
-			} catch (NoSuchMethodException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
-		}
 		return this.title;
 	}
 
@@ -34,6 +35,12 @@ public class TaskViewModel {
 	public void setTitle(String title) {
 		this.title.set(title);
 	}
+	
+	private final ListProperty<TaskViewModel> children = new SimpleListProperty<TaskViewModel>();
+	
+	public ListProperty<TaskViewModel> childrenProperty() {
+		return children;
+	}
 
 	public void saveOrUpdate() {
 		if (task.getId() == null) {
@@ -42,4 +49,5 @@ public class TaskViewModel {
 			service.updateTask(task);
 		}
 	}
+
 }
