@@ -1,28 +1,37 @@
 package net.d80harri.wr.ui.viewmodel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 
-public abstract class ListViewModel<T, U> {
-	private List<T> model;
+public class ListViewModel<T, U> {
+	private Function<U, T> conversionFunction;
+	private BiPredicate<U, T> comparator;
+	private final List<T> model;
 	
-	public ListViewModel(List<T> model) {
+	public ListViewModel(List<T> model, Function<U, T> conversionFunction) {
 		this.model = model;
+		this.conversionFunction = conversionFunction;
 		init();
 	}
 	
 	public void init() {
-//		listProperty().addListener(this::onChanged);
+		listProperty().addListener(this::onChanged);
 	}
 	
-	private ListProperty<U> list = new SimpleListProperty<U>();
+	private Map<U, T> mapping = new HashMap<>(); 
+	private final ListProperty<U> list = new SimpleListProperty<U>(FXCollections.observableArrayList());
 	
 	public ListProperty<U> listProperty() {
 		return list;
@@ -30,22 +39,32 @@ public abstract class ListViewModel<T, U> {
 
 	public void onChanged(
 			javafx.collections.ListChangeListener.Change<? extends U> c) {
-		model = c.getList().stream().<T>map(i -> convert(i)).collect(Collectors.<T>toList());
+		while (c.next()) {
+			if (c.wasPermutated()) {
+				for (int i = c.getFrom(); i< c.getTo(); ++i) {
+					// TBD
+				}
+				throw new RuntimeException("Not yet implemented");
+			} else if (c.wasUpdated()) {
+				throw new RuntimeException("Not yet implemented");
+			} else {
+				for (U elem : c.getRemoved()) {
+					T orig = mapping.get(elem);
+					model.remove(orig);
+				}
+				int i=0;
+				for (U elem : c.getAddedSubList()) {
+					T converted = convert(elem);
+					model.add(c.getFrom() + i, converted);
+					mapping.put(elem, converted);
+					i++;
+				}				
+			}
+		}
 	}
 	
-	protected abstract T convert(U obj);
-	
-	public static void main(String[] args) {
-		ListViewModel<String, Integer> vm = new ListViewModel<String, Integer>(new ArrayList<String>()) {
-
-			@Override
-			protected String convert(Integer obj) {
-				return Integer.toString(obj);
-			}
-		};
-		
-		vm.listProperty().getValue().add(1);
-		vm.model.forEach(e -> System.out.println(e));
+	protected T convert(U obj) {
+		return conversionFunction.apply(obj);
 	}
 
 }
