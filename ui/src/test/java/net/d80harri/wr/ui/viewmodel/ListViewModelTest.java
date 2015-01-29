@@ -1,12 +1,17 @@
 package net.d80harri.wr.ui.viewmodel;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.*;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+
+import org.junit.Test;
 
 public class ListViewModelTest {
 	
@@ -32,5 +37,26 @@ public class ListViewModelTest {
 		
 		vm.listProperty().remove(1);
 		assertThat(model).containsExactly("1", "5");
+	}
+	
+	public String strModel;
+	
+	@Test
+	public void test2() throws Throwable {
+		List<String> model = new ArrayList<String>();
+		ObservableList<String> list = FXCollections.observableList(model);
+		list.addListener((ListChangeListener.Change<? extends String> c) -> {System.out.println(model);});
+		list.add("1");
+		list.add("2");
+		
+		list.setAll("3", "2");
+		
+		StringProperty p = new SimpleStringProperty();
+		p.addListener((obs, o, n) -> strModel = n);
+		System.out.println(strModel);
+		p.set("asdf");
+		System.out.println(strModel);
+		
+		
 	}
 }
