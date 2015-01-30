@@ -14,7 +14,7 @@ import net.d80harri.wr.ui.viewmodel.TaskViewModel;
 
 public class TaskView extends VBox implements Initializable {
 
-	private TaskViewModel model = new TaskViewModel(new TaskDto());
+	private TaskViewModel model = new TaskViewModel(new TaskDto(), false);
 	
 	@FXML private TextField title;
 

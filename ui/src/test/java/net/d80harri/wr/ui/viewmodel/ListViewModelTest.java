@@ -57,6 +57,5 @@ public class ListViewModelTest {
 		p.set("asdf");
 		System.out.println(strModel);
 		
-		
 	}
 }

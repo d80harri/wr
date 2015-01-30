@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
@@ -17,22 +20,25 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
+import net.d80harri.wr.ui.viewmodel.ApplicationViewModel;
+import net.d80harri.wr.ui.viewmodel.MappedList;
 import net.d80harri.wr.ui.viewmodel.TaskViewModel;
 
 public class ApplicationView extends BorderPane implements Initializable {
 
 	@FXML
-	private TreeTableView<TaskViewModel> tree;
+	private TreeTableViewWithItems<TaskViewModel> tree;
 	@FXML
 	private TaskView taskView;
 	@FXML
 	private TreeTableColumn<TaskViewModel, String> titleColumn;
 	@FXML
 	private MenuItem menuAppendChild;
+	@FXML private Button button;
 
 	private WrService service = new WrService();
 
-	private TaskViewModel model = new TaskViewModel(new TaskDto("root"));
+	private ApplicationViewModel applicationViewModel = new ApplicationViewModel();
 
 	public ApplicationView() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
@@ -49,49 +55,32 @@ public class ApplicationView extends BorderPane implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		titleColumn.setCellValueFactory((p) -> p.getValue().getValue()
+		titleColumn.setCellValueFactory((p) -> p.getValue() == null || p.getValue().getValue() == null ? null : p.getValue().getValue()
 				.titleProperty());
 		tree.getSelectionModel().selectedItemProperty()
 				.addListener(this::onSelectedTaskChanged);
-		tree.setRoot(createRootTreeItem());
+		tree.setRoot(new TreeItem<>(applicationViewModel.rootItemProperty()));
+		tree.setItems(applicationViewModel.rootItemProperty().getChildren());
+		//tree.rootProperty().bindBidirectional(applicationViewModel.rootItemProperty());
 		menuAppendChild.setOnAction(this::addTaskToSelected);
+		button.setOnAction(this::onButtonClicked);
 	}
 
-	private TreeItem<TaskViewModel> createRootTreeItem() {
-		TreeItem<TaskViewModel> result = new TreeItem<TaskViewModel>(model);
-		List<TaskDto> allTrees = service.getAllTrees();
-		for (TaskDto dto : allTrees) {
-			result.getChildren().add(createTreeItem(dto));
-		}
-		return result;
-	}
-
-	private TreeItem<TaskViewModel> createTreeItem(TaskDto dto) {
-		TreeItem<TaskViewModel> result = new TreeItem<TaskViewModel>(new TaskViewModel(dto));
-
-		for (TaskDto child : dto.getChildren()) {
-			result.getChildren().add(createTreeItem(child));
-		}
-
-		return result;
+	private void onButtonClicked(ActionEvent evt) {
+		System.out.println();
 	}
 
 	private void addTaskToSelected(ActionEvent evt) {
-		TreeItem<TaskViewModel> selectedItem = tree.getSelectionModel()
-				.getSelectedItem();
-		TreeItem<TaskViewModel> newItem = new TreeItem<TaskViewModel>(new TaskViewModel(new TaskDto("New task")));
-		selectedItem.getChildren().add(
-				newItem);
-		tree.getSelectionModel().select(newItem);
-		taskView.focusOnTitle();
+		tree.getSelectionModel()
+				.getSelectedItem().getValue().addNewChild();;
 	}
 
 	private void onSelectedTaskChanged(
 			ObservableValue<? extends TreeItem<TaskViewModel>> observable,
 			TreeItem<TaskViewModel> oldValue, TreeItem<TaskViewModel> newValue) {
+		if (oldValue != null)
+		oldValue.getValue().saveOrUpdate();
 		taskView.setModel(newValue.getValue());
-		if (oldValue != null && oldValue.getValue() != model)
-			oldValue.getValue().saveOrUpdate();
 	}
 
 }
