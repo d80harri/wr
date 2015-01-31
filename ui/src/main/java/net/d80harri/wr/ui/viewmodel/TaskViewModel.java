@@ -22,7 +22,6 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	public TaskViewModel(TaskDto dto, boolean loaded) {
 		this.task = dto;
 		loadedProperty().set(loaded);
-		this.getChildDtos().addAll(dto.getChildren());
 	}
 	
 	private LongProperty id;
@@ -67,7 +66,7 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	
 	public ObservableList<TaskViewModel> getChildrenViews() {
 		if (this.childrenViews == null) {
-			this.childrenViews = new MappedList<TaskViewModel, TaskDto>(this.getChildDtos(), i -> new TaskViewModel(i, true));
+			this.childrenViews = new MappedList<TaskViewModel, TaskDto>(this.getChildDtos(), i -> { i.setParent(this.task);return new TaskViewModel(i, true);});
 			this.childrenViews.addListener((ListChangeListener.Change<? extends TaskViewModel> c) -> {System.out.println(c);});
 		}
 		return childrenViews;

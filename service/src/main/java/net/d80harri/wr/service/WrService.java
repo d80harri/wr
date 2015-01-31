@@ -81,7 +81,7 @@ public class WrService {
 						do {
 							Task t = stack.pop();
 							if (stack.isEmpty()) {
-								result.add(dtos.get(t));
+								result.add(dto);
 							}
 						} while (!stack.isEmpty() && stack.peek().getRight() < n.getLeft());
 					}
