@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 @Aspect
 public class TransactionAspect {
 	private static final Logger logger = LoggerFactory.getLogger(TransactionAspect.class);
+	public static boolean isActive = true;
 	
 	private static int depth = 0;
 	private static Transaction tx;
@@ -23,6 +24,15 @@ public class TransactionAspect {
 	
 	@Around("transactional()")
 	public Object handleTransaction(ProceedingJoinPoint joinPoint) throws Throwable {
+		if (isActive) {
+			return handleWithinTx(joinPoint);
+		} else {
+			return joinPoint.proceed();
+		}
+	}
+
+	private Object handleWithinTx(ProceedingJoinPoint joinPoint)
+			throws Throwable {
 		Object result = null;
 		Session session = SessionHandler.getInstance().getSession();
 		

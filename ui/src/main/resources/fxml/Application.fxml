@@ -35,6 +35,11 @@
   <top>
     <MenuBar>
       <menus>
+      	<Menu text="File" >
+      		<items>
+      			<MenuItem fx:id="menuReload" text="Reload file" />
+      		</items>
+      	</Menu>
         <Menu mnemonicParsing="false" text="Edit">
           <items>
             <MenuItem id="" fx:id="menuDeleteSubtree" mnemonicParsing="false" text="Delete Subtree">

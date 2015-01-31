@@ -21,6 +21,12 @@ public class WrService {
 	private MapperFacade mapper = mapperFactory.getMapperFacade();
 	private TaskDao dal = new TaskDao();
 
+	public WrService() {}
+	
+	public WrService(TaskDao dao) {
+		this.dal = dao;
+	}
+	
 	public List<TaskDto> getPath(long id) {
 		List<Task> task = dal.getPath(id);
 		return mapper.mapAsList(task, TaskDto.class);
@@ -58,20 +64,28 @@ public class WrService {
 			dtos.put(tasks[0], mapper.map(tasks[0], TaskDto.class));
 
 			Stack<Task> stack = new Stack<Task>();
-			stack.push(tasks[0]);
-			result.add(dtos.get(tasks[0]));
 
-			for (int i = 1; i < tasks.length; i++) {
+			for (int i = 0; i < tasks.length; i++) {
 				Task n = tasks[i];
-				stack.push(n);
-				dtos.put(n, mapper.map(n, TaskDto.class));
-				while (stack.peek().getRight() < n.getLeft()) {
-					Task t = stack.pop();
-					dtos.get(stack.peek()).addChild(dtos.get(t));
-					if (stack.isEmpty())
-						result.add(dtos.get(stack.peek()));
+				TaskDto dto = mapper.map(n, TaskDto.class);
+				dtos.put(n, dto);
+				
+				if (stack.isEmpty()) { // a new root found
+					result.add(dto);
+					stack.push(n);
+				} else {
+					if (stack.peek().getLeft() < n.getLeft() && stack.peek().getRight() > n.getRight()) { // child found
+						dtos.get(stack.peek()).addChild(dto);
+						stack.push(n);
+					} else if (stack.peek().getRight() < n.getLeft()) {
+						do {
+							Task t = stack.pop();
+							if (stack.isEmpty()) {
+								result.add(dtos.get(t));
+							}
+						} while (!stack.isEmpty() && stack.peek().getRight() < n.getLeft());
+					}
 				}
-
 			}
 		}
 		return result;

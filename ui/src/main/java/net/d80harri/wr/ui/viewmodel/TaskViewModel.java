@@ -22,6 +22,7 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	public TaskViewModel(TaskDto dto, boolean loaded) {
 		this.task = dto;
 		loadedProperty().set(loaded);
+		this.getChildDtos().addAll(dto.getChildren());
 	}
 	
 	private LongProperty id;

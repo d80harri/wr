@@ -58,6 +58,11 @@ public class Task {
 
 	public Task() {}
 	
+	public Task(long left, long right) {
+		this.left = left;
+		this.right = right;
+	}
+	
 	public Task(String title) {
 		this.title = title;
 	}

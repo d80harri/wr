@@ -26,14 +26,12 @@ import net.d80harri.wr.ui.viewmodel.TaskViewModel;
 
 public class ApplicationView extends BorderPane implements Initializable {
 
-	@FXML
-	private TreeTableViewWithItems<TaskViewModel> tree;
-	@FXML
-	private TaskView taskView;
-	@FXML
-	private TreeTableColumn<TaskViewModel, String> titleColumn;
-	@FXML
-	private MenuItem menuAppendChild;
+	@FXML private TreeTableViewWithItems<TaskViewModel> tree;
+	@FXML private TaskView taskView;
+	@FXML private TreeTableColumn<TaskViewModel, String> titleColumn;
+	@FXML private MenuItem menuAppendChild;
+	@FXML private MenuItem menuReload;
+	@FXML private MenuItem menuDeleteSubtree;
 	@FXML private Button button;
 
 	private WrService service = new WrService();
@@ -59,10 +57,12 @@ public class ApplicationView extends BorderPane implements Initializable {
 				.titleProperty());
 		tree.getSelectionModel().selectedItemProperty()
 				.addListener(this::onSelectedTaskChanged);
-		tree.setRoot(new TreeItem<>(applicationViewModel.rootItemProperty()));
-		tree.setItems(applicationViewModel.rootItemProperty().getChildren());
+		tree.setRoot(new TreeItem<>(applicationViewModel.getRootTaskViewModel()));
+		tree.setItems(applicationViewModel.getRootTaskViewModel().getChildren());
 		//tree.rootProperty().bindBidirectional(applicationViewModel.rootItemProperty());
 		menuAppendChild.setOnAction(this::addTaskToSelected);
+		menuReload.setOnAction((e) -> applicationViewModel.getRootTaskViewModel().load(service) );
+		menuDeleteSubtree.setOnAction(this::deleteSelectedSubtree);
 		button.setOnAction(this::onButtonClicked);
 	}
 
@@ -72,14 +72,18 @@ public class ApplicationView extends BorderPane implements Initializable {
 
 	private void addTaskToSelected(ActionEvent evt) {
 		tree.getSelectionModel()
-				.getSelectedItem().getValue().addNewChild();;
+				.getSelectedItem().getValue().addNewChild();
+	}
+	
+	private void deleteSelectedSubtree(ActionEvent evt) {
+		throw new RuntimeException("NYI");
 	}
 
 	private void onSelectedTaskChanged(
 			ObservableValue<? extends TreeItem<TaskViewModel>> observable,
 			TreeItem<TaskViewModel> oldValue, TreeItem<TaskViewModel> newValue) {
-		if (oldValue != null)
-		oldValue.getValue().saveOrUpdate();
+		if (oldValue != null && oldValue.getValue() != applicationViewModel.getRootTaskViewModel())
+			oldValue.getValue().saveOrUpdate();
 		taskView.setModel(newValue.getValue());
 	}
 
