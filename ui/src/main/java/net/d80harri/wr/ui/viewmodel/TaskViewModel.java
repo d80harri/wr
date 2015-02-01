@@ -1,5 +1,6 @@
 package net.d80harri.wr.ui.viewmodel;
 
+import static javafx.beans.binding.Bindings.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,13 +17,16 @@ import net.d80harri.wr.ui.HierarchyData;
 public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	private final WrService service = new WrService();
 	
-	private final TaskDto task;
+	private TaskDto task;
 	
 	
-	public TaskViewModel(TaskDto dto, boolean loaded) {
+	public TaskViewModel(TaskDto dto, TaskViewModel parent, boolean loaded) {
 		this.task = dto;
+		this.parent = parent;
 		loadedProperty().set(loaded);
 	}
+	
+	private boolean deleted = false;
 	
 	private LongProperty id;
 	
@@ -32,6 +36,20 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 			id.addListener((obs, o, n) -> task.setId((Long)n));
 		}
 		return id;
+	}
+	
+	public Long getId() {
+		return idProperty().get();
+	}
+	
+	public void setId(Long id) {
+		idProperty().set(id);
+	}
+	
+	private final TaskViewModel parent;
+	
+	public TaskViewModel getParent() {
+		return parent;
 	}
 	
 	private StringProperty title;
@@ -52,6 +70,23 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 		this.titleProperty().set(title);
 	}
 	
+	private StringProperty content;
+	
+	public StringProperty contentProperty() {
+		if (content == null) {
+			content = new SimpleStringProperty(task.getContent());
+			content.addListener((obs, o, n) -> task.setContent(n));
+		}
+		return content;
+	}
+	
+	public String getContent() {
+		return contentProperty().get();
+	}
+	
+	public void setContent(String content) {
+		contentProperty().set(content);
+	}
 	
 	private ObservableList<TaskDto> childDtos;
 	
@@ -66,8 +101,7 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	
 	public ObservableList<TaskViewModel> getChildrenViews() {
 		if (this.childrenViews == null) {
-			this.childrenViews = new MappedList<TaskViewModel, TaskDto>(this.getChildDtos(), i -> { i.setParent(this.task);return new TaskViewModel(i, true);});
-			this.childrenViews.addListener((ListChangeListener.Change<? extends TaskViewModel> c) -> {System.out.println(c);});
+			this.childrenViews = new MappedList<TaskViewModel, TaskDto>(this.getChildDtos(), i -> { i.setParent(this.task);return new TaskViewModel(i, this, true);});
 		}
 		return childrenViews;
 	}
@@ -86,11 +120,21 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 		return loaded;
 	}
 	
+	public boolean isLoaded() {
+		return loadedProperty().get();
+	}
+	
+	public void setLoaded(boolean loaded) {
+		this.loadedProperty().set(loaded);
+	}
+	
 	public void saveOrUpdate() {
-		if (task.getId() == null) {
-			service.storeSubtree(task.getParent() == null ? null : task.getParent().getId(), task);
-		} else {
-			service.updateTask(task);
+		if (!deleted) {
+			if (task.getId() == null) {
+				service.storeSubtree(task.getParent() == null ? null : task.getParent().getId(), task);
+			} else {
+				service.updateTask(task);
+			}
 		}
 	}
 
@@ -99,14 +143,37 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	}
 	
 	public void addNewChild() {
-		addChild(new TaskDto("Unnamed Child"));
+		TaskDto parent = getParent() == null ? null : getParent().task;
+		addChild(new TaskDto("Unnamed Child", parent));
 	}
 	
 	public void load(WrService service) {
-		if (task.getId() == null) {
-			service.getAllTrees().forEach(i -> addChild(i));
+		if (!this.isLoaded()) {
+			if (task.getId() == null) {
+				service.getAllTrees().forEach(i -> addChild(i));
+			} else {
+				throw new RuntimeException("NYI");
+			}
+		}
+	}
+
+	public void reload(WrService service) {
+		if (!isLoaded()) {
+			load(service);
 		} else {
-			throw new RuntimeException("NYI");
+			if (task.getId() == null) {
+				service.getAllTrees().forEach(i -> addChild(i));
+			} else {
+				throw new RuntimeException("NYI");
+			}
+		}
+	}
+
+	public void delete(WrService service) {
+		service.deleteSubtree(getId());
+		this.deleted = true;
+		if (getParent() != null) {
+			getParent().getChildDtos().remove(this.task);
 		}
 	}
 }

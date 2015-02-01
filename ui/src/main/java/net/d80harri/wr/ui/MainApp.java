@@ -12,6 +12,9 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+
+    	SessionHandler.configure("jdbc:h2:~/prod;AUTO_SERVER=true");
+    	
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
         
         Scene scene = new Scene(root);
@@ -20,6 +23,13 @@ public class MainApp extends Application {
         stage.setTitle("JavaFX and Maven");
         stage.setScene(scene);
         stage.show();
+        
+        try {
+			stage.setOnCloseRequest((e) -> SessionHandler.getInstance().close());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     /**
@@ -31,7 +41,6 @@ public class MainApp extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-    	SessionHandler.configure("jdbc:h2:~/prod;AUTO_SERVER=true");
         launch(args);
     }
 

@@ -25,6 +25,6 @@
         </ChoiceBox>
       </children>
     </HBox>
-    <TextArea fx:id="content" prefWidth="200.0" promptText="Note" wrapText="true" text="${task.content}" />
+    <TextArea fx:id="content" prefWidth="200.0" promptText="Note" wrapText="true" />
   </children>
 </fx:root>

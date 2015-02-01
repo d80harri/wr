@@ -72,7 +72,7 @@ public class SessionHandler implements Closeable {
 		return this.session;
 	}
 
-	public void close() throws IOException {
+	public void close() {
 		if (this.sessionFactory != null) {
 			this.sessionFactory.close();
 		}

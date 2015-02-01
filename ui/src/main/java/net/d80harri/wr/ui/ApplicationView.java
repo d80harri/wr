@@ -2,12 +2,9 @@ package net.d80harri.wr.ui;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,12 +13,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
 import net.d80harri.wr.service.WrService;
-import net.d80harri.wr.service.model.TaskDto;
 import net.d80harri.wr.ui.viewmodel.ApplicationViewModel;
-import net.d80harri.wr.ui.viewmodel.MappedList;
 import net.d80harri.wr.ui.viewmodel.TaskViewModel;
 
 public class ApplicationView extends BorderPane implements Initializable {
@@ -55,36 +49,26 @@ public class ApplicationView extends BorderPane implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		titleColumn.setCellValueFactory((p) -> p.getValue() == null || p.getValue().getValue() == null ? null : p.getValue().getValue()
 				.titleProperty());
-		tree.getSelectionModel().selectedItemProperty()
-				.addListener(this::onSelectedTaskChanged);
-		tree.setRoot(new TreeItem<>(applicationViewModel.getRootTaskViewModel()));
-		tree.setItems(applicationViewModel.getRootTaskViewModel().getChildren());
-		//tree.rootProperty().bindBidirectional(applicationViewModel.rootItemProperty());
-		menuAppendChild.setOnAction(this::addTaskToSelected);
-		menuReload.setOnAction((e) -> applicationViewModel.getRootTaskViewModel().load(service) );
-		menuDeleteSubtree.setOnAction(this::deleteSelectedSubtree);
+		tree.setRoot(new TreeItem<>(null));
+		tree.setItems(applicationViewModel.getRootTaskViewModels());
+
+		menuAppendChild.setOnAction((e) -> applicationViewModel.addTaskToSelected());
+		menuReload.setOnAction((e) -> applicationViewModel.reload(service) );
+		menuDeleteSubtree.setOnAction((e) -> applicationViewModel.deleteSelectedSubtree(service));
 		button.setOnAction(this::onButtonClicked);
+		
+		applicationViewModel.selectedTaskProperty().bind(Bindings.select(tree.getSelectionModel().selectedItemProperty(), "value"));
+		applicationViewModel.load(service);
+		
+		taskView.modelProperty().bind(applicationViewModel.selectedTaskProperty());
 	}
 
 	private void onButtonClicked(ActionEvent evt) {
 		System.out.println();
 	}
-
-	private void addTaskToSelected(ActionEvent evt) {
-		tree.getSelectionModel()
-				.getSelectedItem().getValue().addNewChild();
-	}
 	
 	private void deleteSelectedSubtree(ActionEvent evt) {
 		throw new RuntimeException("NYI");
-	}
-
-	private void onSelectedTaskChanged(
-			ObservableValue<? extends TreeItem<TaskViewModel>> observable,
-			TreeItem<TaskViewModel> oldValue, TreeItem<TaskViewModel> newValue) {
-		if (oldValue != null && oldValue.getValue() != applicationViewModel.getRootTaskViewModel())
-			oldValue.getValue().saveOrUpdate();
-		taskView.setModel(newValue.getValue());
 	}
 
 }
