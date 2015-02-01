@@ -13,7 +13,7 @@ public class TaskViewModelTest {
 		root.addChild(new TaskDto("firstChild"));
 		root.addChild(new TaskDto("secondChild"));
 		
-		TaskViewModel model = new TaskViewModel(root);
+		TaskViewModel model = new TaskViewModel(root, null, true);
 		
 		assertThat(model.getChildrenViews()).hasSize(2);
 		
