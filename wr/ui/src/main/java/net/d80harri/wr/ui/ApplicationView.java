@@ -64,11 +64,8 @@ public class ApplicationView extends BorderPane implements Initializable {
 	}
 
 	private void onButtonClicked(ActionEvent evt) {
-		System.out.println();
+		
 	}
-	
-	private void deleteSelectedSubtree(ActionEvent evt) {
-		throw new RuntimeException("NYI");
-	}
+
 
 }

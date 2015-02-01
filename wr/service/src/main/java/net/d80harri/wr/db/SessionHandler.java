@@ -128,32 +128,4 @@ public class SessionHandler implements Closeable {
 		return currentHandler;
 	}
 
-	public static void main(String[] args) {
-		try {
-			WrService dal = new WrService();
-			SessionHandler.configure("jdbc:h2:~/wr;AUTO_SERVER=true");
-
-			TaskDto t = new TaskDto("task");
-			TaskDto root = t;
-			
-			for (int i=0; i<2; i++) {
-				t = new TaskDto("task" + i, t);
-			}
-			dal.storeSubtree(null, root);
-
-			root = dal.getSubtree(root.getId());
-			
-			LinkedList<TaskDto> tasks = new LinkedList<TaskDto>();
-			tasks.add(root);
-			
-			while (!tasks.isEmpty()) {
-				TaskDto it = tasks.poll();
-				System.out.println(it.getTitle());
-				
-				tasks.addAll(it.getChildren());
-			}
-		} finally {
-			//System.exit(0);
-		}
-	}
 }

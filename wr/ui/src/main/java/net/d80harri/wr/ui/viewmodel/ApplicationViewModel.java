@@ -78,6 +78,7 @@ public class ApplicationViewModel {
 	
 	public void reload(WrService service) {
 		getRootTasks().clear();
+		setLoaded(false);
 		load(service);
 	}
 	

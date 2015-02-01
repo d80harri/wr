@@ -45,7 +45,6 @@ public class TaskDto {
 	
 	public void setTitle(String title) {
 		this.title = title;
-		System.out.println(this.title);
 	}
 	
 	public String getContent() {

@@ -45,7 +45,6 @@ public class ListViewModelTest {
 	public void test2() throws Throwable {
 		List<String> model = new ArrayList<String>();
 		ObservableList<String> list = FXCollections.observableList(model);
-		list.addListener((ListChangeListener.Change<? extends String> c) -> {System.out.println(model);});
 		list.add("1");
 		list.add("2");
 		
@@ -53,9 +52,7 @@ public class ListViewModelTest {
 		
 		StringProperty p = new SimpleStringProperty();
 		p.addListener((obs, o, n) -> strModel = n);
-		System.out.println(strModel);
 		p.set("asdf");
-		System.out.println(strModel);
 		
 	}
 }
