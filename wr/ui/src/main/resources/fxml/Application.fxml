@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.d80harri.wr.ui.*?>
+<?import javafx.collections.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.Button?>
+<?import net.d80harri.wr.ui.TreeTableViewWithItems?>
+
+<fx:root type="javafx.scene.layout.BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
+  <center>
+    <SplitPane dividerPositions="0.5" focusTraversable="true" prefHeight="160.0" prefWidth="200.0">
+      <items>
+        <TreeTableViewWithItems  fx:id="tree" prefHeight="574.0" prefWidth="100.0" showRoot="false" >
+        	<columns>
+        		<TreeTableColumn fx:id="titleColumn" text="Title" minWidth="300"/>
+        	</columns>
+        </TreeTableViewWithItems>
+        <VBox prefHeight="200.0" prefWidth="194.0">
+          <children>
+          	<TaskView fx:id="taskView" layoutX="5.0" layoutY="4.0">
+          	</TaskView>
+          </children>
+        </VBox>
+      </items>
+    </SplitPane>
+  </center>
+  <top>
+    <MenuBar>
+      <menus>
+      	<Menu text="File" >
+      		<items>
+      			<MenuItem fx:id="menuReload" text="Reload file" />
+      		</items>
+      	</Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+          <items>
+            <MenuItem id="" fx:id="menuDeleteSubtree" mnemonicParsing="false" text="Delete Subtree">
+              <accelerator>
+                <KeyCodeCombination alt="DOWN" code="D" control="UP" meta="UP" shift="UP" shortcut="UP" />
+              </accelerator>
+            </MenuItem>
+            <MenuItem id="" fx:id="menuAppendChild" mnemonicParsing="false" text="Append Child" >
+              <accelerator>
+                <KeyCodeCombination alt="DOWN" code="A" control="UP" meta="UP" shift="UP" shortcut="UP" />
+              </accelerator>
+            </MenuItem>
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+  </top>
+  <bottom>
+  	<Button fx:id="button" text="Debug"/>
+  </bottom>
+</fx:root>
