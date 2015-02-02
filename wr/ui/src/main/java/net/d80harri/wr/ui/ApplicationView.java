@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.beans.binding.Bindings;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +18,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.layout.BorderPane;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.ui.viewmodel.ApplicationViewModel;
+import net.d80harri.wr.ui.viewmodel.TreeViewModel;
 import net.d80harri.wr.ui.viewmodel.TaskViewModel;
 
 public class ApplicationView extends BorderPane implements Initializable {
@@ -50,17 +53,30 @@ public class ApplicationView extends BorderPane implements Initializable {
 		titleColumn.setCellValueFactory((p) -> p.getValue() == null || p.getValue().getValue() == null ? null : p.getValue().getValue()
 				.titleProperty());
 		tree.setRoot(new TreeItem<>(null));
-		tree.setItems(applicationViewModel.getRootTaskViewModels());
+		Bindings.bindContent(tree.getRoot().getChildren(), applicationViewModel.getRootTaskViewModels());
+		
+		applicationViewModel.getRootTaskViewModels().addListener(new ListChangeListener<TreeViewModel>() {
 
+			@Override
+			public void onChanged(
+					javafx.collections.ListChangeListener.Change<? extends TreeViewModel> arg0) {
+				System.out.println(arg0);
+			}
+			
+		});
+		
 		menuAppendChild.setOnAction((e) -> applicationViewModel.addTaskToSelected());
 		menuReload.setOnAction((e) -> applicationViewModel.reload(service) );
 		menuDeleteSubtree.setOnAction((e) -> applicationViewModel.deleteSelectedSubtree(service));
 		button.setOnAction(this::onButtonClicked);
 		
-		applicationViewModel.selectedTaskProperty().bind(Bindings.select(tree.getSelectionModel().selectedItemProperty(), "value"));
+		applicationViewModel.selectedTaskProperty().addListener((i) -> tree.getSelectionModel().select((TreeViewModel)i));
+		tree.getSelectionModel().selectedItemProperty().addListener((i) -> applicationViewModel.selectedTaskProperty().set((TreeViewModel)i));
+		
+//		applicationViewModel.selectedTaskProperty().bind(tree.getSelectionModel().selectedItemProperty());
 		applicationViewModel.load(service);
 		
-		taskView.modelProperty().bind(applicationViewModel.selectedTaskProperty());
+		applicationViewModel.selectedTaskProperty().addListener((obs, o, n) -> taskView.modelProperty().set(n.getValue()));
 	}
 
 	private void onButtonClicked(ActionEvent evt) {

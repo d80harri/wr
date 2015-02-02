@@ -11,42 +11,34 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
+import net.d80harri.wr.ui.TaskView;
 
 public class ApplicationViewModel {
 		
-	private ObservableList<TaskDto> rootTasks;
+	private ObservableList<TreeViewModel> rootTaskViewModels;
 	
-	public ObservableList<TaskDto> getRootTasks() {
-		if (rootTasks == null) {
-			rootTasks = FXCollections.observableArrayList();
-		}
-		return rootTasks;
-	}
-	
-	private ObservableList<TaskViewModel> rootTaskViewModels;
-	
-	public ObservableList<TaskViewModel> getRootTaskViewModels() {
+	public ObservableList<TreeViewModel> getRootTaskViewModels() {
 		if (rootTaskViewModels == null) {
-			rootTaskViewModels = new MappedList<TaskViewModel, TaskDto>(getRootTasks(), (i) -> new TaskViewModel(i, null, true));
+			rootTaskViewModels = FXCollections.observableArrayList();
 		}
 		return rootTaskViewModels;
 	}
 	
-	private ObjectProperty<TaskViewModel> selectedTask;
+	private ObjectProperty<TreeViewModel> selectedTask;
 	
-	public ObjectProperty<TaskViewModel> selectedTaskProperty() {
+	public ObjectProperty<TreeViewModel> selectedTaskProperty() {
 		if (selectedTask == null) {
-			selectedTask = new SimpleObjectProperty<TaskViewModel>();
+			selectedTask = new SimpleObjectProperty<TreeViewModel>();
 			selectedTask.addListener((obs, o, n) -> {
 				if (o != null) {
-				o.saveOrUpdate();
+					o.saveOrUpdate();
 				}
 			});
 		}
 		return selectedTask;
 	}
 	
-	public TaskViewModel getSelectedTask() {
+	public TreeViewModel getSelectedTask() {
 		return selectedTaskProperty().get();
 	}
 	
@@ -71,30 +63,35 @@ public class ApplicationViewModel {
 	
 	public void load(WrService service) {
 		if (!isLoaded()) {
-			getRootTasks().addAll(service.getAllTrees());
+			getRootTaskViewModels().addAll(service.getAllTrees().stream().map((i) -> new TreeViewModel(new TaskViewModel(i, null, true))).collect(Collectors.toList()));
 			setLoaded(true);
 		}
 	}
 	
 	public void reload(WrService service) {
-		getRootTasks().clear();
+		getRootTaskViewModels().clear();
 		setLoaded(false);
 		load(service);
 	}
 	
-	public void addTaskToSelected() {
+	public TreeViewModel addTaskToSelected() {
+		TreeViewModel result = null;
 		if (getSelectedTask() == null) {
-			getRootTasks().add(new TaskDto("No title"));
+			TaskViewModel model = new TaskViewModel(new TaskDto("No title"), null, true);
+			result = new TreeViewModel(model);
+			getRootTaskViewModels().add(result);
 		} else {
 			getSelectedTask().addNewChild();
 		}
+
+		selectedTaskProperty().set(result);
+		return result;
 	}
 
 	public void deleteSelectedSubtree(WrService service) {
 		getSelectedTask().delete(service);
 		if (getSelectedTask().getParent() == null) {
-			List<TaskDto> toDelete = getRootTasks().stream().filter((i) -> i.getId() == getSelectedTask().getId() || getSelectedTask().getId().equals(i.getId())).collect(Collectors.toList());
-			getRootTasks().removeAll(toDelete);
+			getRootTaskViewModels().remove(getSelectedTask());
 		}
 	}
 	
