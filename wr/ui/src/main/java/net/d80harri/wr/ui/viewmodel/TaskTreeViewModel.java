@@ -1,31 +1,48 @@
 package net.d80harri.wr.ui.viewmodel;
 
 import net.d80harri.wr.service.WrService;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TreeItem;
 
 public class TaskTreeViewModel extends TreeViewModel<TaskViewModel> {
 
-	public TaskTreeViewModel(TreeItem<TreeViewModel<TaskViewModel>> treeItem,
+	public TaskTreeViewModel(TreeViewModel<TaskViewModel> parent,
 			TaskViewModel model) {
-		super(treeItem, model);
+		super(parent, model);
 	}
 
+	private ObservableList<TreeViewModel<TaskViewModel>> children;
 	@Override
-	public ObservableList<TaskViewModel> getChildren() {
-		return getModel().getChildren();
+	public ObservableList<TreeViewModel<TaskViewModel>> getChildrenData() {
+		if (children == null) {
+			if (model == null) {
+				children = new MappedList<TreeViewModel<TaskViewModel>, TaskViewModel>(FXCollections.observableArrayList(), i -> new TaskTreeViewModel(this, i), i -> i.model);
+			} else {
+				children = new MappedList<TreeViewModel<TaskViewModel>, TaskViewModel>(model.getChildren(), i -> new TaskTreeViewModel(this, i), i -> i.model);
+			}
+			children.addListener(new ListChangeListener<TreeViewModel<TaskViewModel>>() {
+
+				@Override
+				public void onChanged(
+						javafx.collections.ListChangeListener.Change<? extends TreeViewModel<TaskViewModel>> c) {
+					System.out.println("CHANGE: " + children.size());
+				}
+				
+			});
+		}
+		return children;
 	}
 
-	
 	public void saveOrUpdate() {
-		getModel().saveOrUpdate();
+		this.model.saveOrUpdate();
 	}
 
 	public void addNewChild() {
-		getModel().addNewChild();
+		this.model.addNewChild();
 	}
 
 	public void delete(WrService service) {
-		getModel().delete(service);
-	}
+		this.model.delete(service);
+	}	
 }

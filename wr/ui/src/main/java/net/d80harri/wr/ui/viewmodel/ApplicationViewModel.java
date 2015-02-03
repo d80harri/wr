@@ -15,20 +15,17 @@ import net.d80harri.wr.ui.TaskView;
 
 public class ApplicationViewModel {
 		
-	private ObservableList<TreeViewModel> rootTaskViewModels;
+	private TaskTreeViewModel rootTaskTreeViewModel = new TaskTreeViewModel(null, new TaskViewModel(new TaskDto(), null, true));
 	
-	public ObservableList<TreeViewModel> getRootTaskViewModels() {
-		if (rootTaskViewModels == null) {
-			rootTaskViewModels = FXCollections.observableArrayList();
-		}
-		return rootTaskViewModels;
+	public TaskTreeViewModel getRootTaskTreeViewModel() {
+		return rootTaskTreeViewModel;
 	}
 	
-	private ObjectProperty<TreeViewModel> selectedTask;
+	private ObjectProperty<TaskTreeViewModel> selectedTask;
 	
-	public ObjectProperty<TreeViewModel> selectedTaskProperty() {
+	public ObjectProperty<TaskTreeViewModel> selectedTaskProperty() {
 		if (selectedTask == null) {
-			selectedTask = new SimpleObjectProperty<TreeViewModel>();
+			selectedTask = new SimpleObjectProperty<TaskTreeViewModel>();
 			selectedTask.addListener((obs, o, n) -> {
 				if (o != null) {
 					o.saveOrUpdate();
@@ -38,7 +35,7 @@ public class ApplicationViewModel {
 		return selectedTask;
 	}
 	
-	public TreeViewModel getSelectedTask() {
+	public TaskTreeViewModel getSelectedTask() {
 		return selectedTaskProperty().get();
 	}
 	
@@ -63,23 +60,22 @@ public class ApplicationViewModel {
 	
 	public void load(WrService service) {
 		if (!isLoaded()) {
-			getRootTaskViewModels().addAll(service.getAllTrees().stream().map((i) -> new TreeViewModel(new TaskViewModel(i, null, true))).collect(Collectors.toList()));
+			getRootTaskTreeViewModel().getChildren().addAll(service.getAllTrees().stream().map((i) -> new TaskTreeViewModel(null, new TaskViewModel(i, null, true))).collect(Collectors.toList()));
 			setLoaded(true);
 		}
 	}
 	
 	public void reload(WrService service) {
-		getRootTaskViewModels().clear();
+		getRootTaskTreeViewModel().getChildren().clear();
 		setLoaded(false);
 		load(service);
 	}
 	
-	public TreeViewModel addTaskToSelected() {
-		TreeViewModel result = null;
+	public TaskTreeViewModel addTaskToSelected() {
+		TaskTreeViewModel result = null;
 		if (getSelectedTask() == null) {
 			TaskViewModel model = new TaskViewModel(new TaskDto("No title"), null, true);
-			result = new TreeViewModel(model);
-			getRootTaskViewModels().add(result);
+			result = new TaskTreeViewModel(getRootTaskTreeViewModel(), model);
 		} else {
 			getSelectedTask().addNewChild();
 		}
@@ -91,7 +87,7 @@ public class ApplicationViewModel {
 	public void deleteSelectedSubtree(WrService service) {
 		getSelectedTask().delete(service);
 		if (getSelectedTask().getParent() == null) {
-			getRootTaskViewModels().remove(getSelectedTask());
+			getRootTaskTreeViewModel().getChildren().remove(getSelectedTask());
 		}
 	}
 	

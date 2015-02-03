@@ -101,7 +101,9 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 	
 	public ObservableList<TaskViewModel> getChildrenViews() {
 		if (this.childrenViews == null) {
-			this.childrenViews = new MappedList<TaskViewModel, TaskDto>(this.getChildDtos(), i -> { i.setParent(this.task);return new TaskViewModel(i, this, true);});
+			this.childrenViews = new MappedList<TaskViewModel, TaskDto>(this.getChildDtos(), 
+					i -> { i.setParent(this.task);return new TaskViewModel(i, this, true);},
+					i -> i.task);
 		}
 		return childrenViews;
 	}

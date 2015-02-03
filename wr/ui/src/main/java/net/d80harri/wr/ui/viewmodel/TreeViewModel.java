@@ -3,35 +3,28 @@ package net.d80harri.wr.ui.viewmodel;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
-public abstract class TreeViewModel<T> {
+public abstract class TreeViewModel<T> extends TreeItem<T> {
 
-	private TreeItem<TreeViewModel<T>> treeItem;
-	private T model;
+	protected T model;
 	
-	public TreeViewModel(TreeItem<TreeViewModel<T>> treeItem, T model) {
-		this.treeItem = treeItem;
+	public TreeViewModel(TreeViewModel<T> parent, T model) {
+		if (parent != null) {
+			parent.getChildren().add(this);
+		}
 		this.model = model;
 	}
 
-	public abstract ObservableList<T> getChildren();
+	public abstract ObservableList<TreeViewModel<T>> getChildrenData();
 	
-	private ObservableList<TreeViewModel<T>> treeViewModels;
-	
-	public ObservableList<TreeViewModel<T>> getTreeViewModels() {
-		if (treeViewModels == null) {
-			treeViewModels = new MappedList<TreeViewModel<T>, T>(getChildren(), i -> new TreeViewM)
+	private ObservableList<TreeItem<T>> children;
+	@Override
+	public ObservableList<TreeItem<T>> getChildren() {
+		if (this.children == null) {
+			children = new MappedList<TreeItem<T>, TreeViewModel<T>>(getChildrenData(), i -> (TreeItem<T>) i, i -> (TreeViewModel<T>) i);
 		}
-		return treeViewModels;
+		return children;
 	}
 	
-	private ObservableList<TreeItem<TreeViewModel<T>>> treeItems; 
-	
-	public ObservableList<TreeItem<TreeViewModel<T>>> getTreeItems() {
-		if (treeItems == null) {
-			treeItems = new MappedList<TreeItem<TreeViewModel<T>>, TreeViewModel<T>>(getTreeViewModels(), (i) -> new TreeItem<TreeViewModel<T>>(i));
-		}
-		return treeItems;
-	}
 
 	public T getModel() {
 		return model;

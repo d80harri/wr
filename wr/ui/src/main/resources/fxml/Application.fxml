@@ -13,16 +13,17 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.control.Button?>
 <?import net.d80harri.wr.ui.TreeTableViewWithItems?>
+<?import javafx.scene.control.TreeTableView?>
 
 <fx:root type="javafx.scene.layout.BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
   <center>
     <SplitPane dividerPositions="0.5" focusTraversable="true" prefHeight="160.0" prefWidth="200.0">
       <items>
-        <TreeTableViewWithItems  fx:id="tree" prefHeight="574.0" prefWidth="100.0" showRoot="false" >
+        <TreeTableView  fx:id="tree" prefHeight="574.0" prefWidth="100.0" showRoot="true" >
         	<columns>
         		<TreeTableColumn fx:id="titleColumn" text="Title" minWidth="300"/>
         	</columns>
-        </TreeTableViewWithItems>
+        </TreeTableView>
         <VBox prefHeight="200.0" prefWidth="194.0">
           <children>
           	<TaskView fx:id="taskView" layoutX="5.0" layoutY="4.0">

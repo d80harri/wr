@@ -4,26 +4,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.beans.binding.Bindings;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.ui.viewmodel.ApplicationViewModel;
-import net.d80harri.wr.ui.viewmodel.TreeViewModel;
+import net.d80harri.wr.ui.viewmodel.TaskTreeViewModel;
 import net.d80harri.wr.ui.viewmodel.TaskViewModel;
+import net.d80harri.wr.ui.viewmodel.TreeViewModel;
 
 public class ApplicationView extends BorderPane implements Initializable {
 
-	@FXML private TreeTableViewWithItems<TaskViewModel> tree;
+	@FXML private TreeTableView<TaskViewModel> tree;
 	@FXML private TaskView taskView;
 	@FXML private TreeTableColumn<TaskViewModel, String> titleColumn;
 	@FXML private MenuItem menuAppendChild;
@@ -52,26 +50,15 @@ public class ApplicationView extends BorderPane implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		titleColumn.setCellValueFactory((p) -> p.getValue() == null || p.getValue().getValue() == null ? null : p.getValue().getValue()
 				.titleProperty());
-		tree.setRoot(new TreeItem<>(null));
-		Bindings.bindContent(tree.getRoot().getChildren(), applicationViewModel.getRootTaskViewModels());
-		
-		applicationViewModel.getRootTaskViewModels().addListener(new ListChangeListener<TreeViewModel>() {
+		tree.setRoot(applicationViewModel.getRootTaskTreeViewModel());
 
-			@Override
-			public void onChanged(
-					javafx.collections.ListChangeListener.Change<? extends TreeViewModel> arg0) {
-				System.out.println(arg0);
-			}
-			
-		});
-		
 		menuAppendChild.setOnAction((e) -> applicationViewModel.addTaskToSelected());
 		menuReload.setOnAction((e) -> applicationViewModel.reload(service) );
 		menuDeleteSubtree.setOnAction((e) -> applicationViewModel.deleteSelectedSubtree(service));
 		button.setOnAction(this::onButtonClicked);
 		
 		applicationViewModel.selectedTaskProperty().addListener((i) -> tree.getSelectionModel().select((TreeViewModel)i));
-		tree.getSelectionModel().selectedItemProperty().addListener((i) -> applicationViewModel.selectedTaskProperty().set((TreeViewModel)i));
+		tree.getSelectionModel().selectedItemProperty().addListener((i) -> applicationViewModel.selectedTaskProperty().set((TaskTreeViewModel)i));
 		
 //		applicationViewModel.selectedTaskProperty().bind(tree.getSelectionModel().selectedItemProperty());
 		applicationViewModel.load(service);
@@ -80,7 +67,7 @@ public class ApplicationView extends BorderPane implements Initializable {
 	}
 
 	private void onButtonClicked(ActionEvent evt) {
-		
+		System.out.println(applicationViewModel);
 	}
 
 
