@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
@@ -48,8 +49,7 @@ public class ApplicationView extends BorderPane implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		titleColumn.setCellValueFactory((p) -> p.getValue() == null || p.getValue().getValue() == null ? null : p.getValue().getValue()
-				.titleProperty());
+		titleColumn.setCellValueFactory(p -> ((TaskTreeViewModel)p.getValue()).titleProperty());
 		tree.setRoot(applicationViewModel.getRootTaskTreeViewModel());
 
 		menuAppendChild.setOnAction((e) -> applicationViewModel.addTaskToSelected());
@@ -57,13 +57,13 @@ public class ApplicationView extends BorderPane implements Initializable {
 		menuDeleteSubtree.setOnAction((e) -> applicationViewModel.deleteSelectedSubtree(service));
 		button.setOnAction(this::onButtonClicked);
 		
-		applicationViewModel.selectedTaskProperty().addListener((i) -> tree.getSelectionModel().select((TreeViewModel)i));
-		tree.getSelectionModel().selectedItemProperty().addListener((i) -> applicationViewModel.selectedTaskProperty().set((TaskTreeViewModel)i));
+		applicationViewModel.selectedTaskProperty().addListener((obs, o, n) -> tree.getSelectionModel().select((TreeViewModel)n));
+		tree.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> applicationViewModel.selectedTaskProperty().set((TaskTreeViewModel)n));
 		
 //		applicationViewModel.selectedTaskProperty().bind(tree.getSelectionModel().selectedItemProperty());
 		applicationViewModel.load(service);
 		
-		applicationViewModel.selectedTaskProperty().addListener((obs, o, n) -> taskView.modelProperty().set(n.getValue()));
+		applicationViewModel.selectedTaskProperty().addListener((obs, o, n) -> taskView.setModel(n.getValue()));
 	}
 
 	private void onButtonClicked(ActionEvent evt) {

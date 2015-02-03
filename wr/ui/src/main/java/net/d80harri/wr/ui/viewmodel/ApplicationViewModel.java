@@ -15,7 +15,7 @@ import net.d80harri.wr.ui.TaskView;
 
 public class ApplicationViewModel {
 		
-	private TaskTreeViewModel rootTaskTreeViewModel = new TaskTreeViewModel(null, new TaskViewModel(new TaskDto(), null, true));
+	private TaskTreeViewModel rootTaskTreeViewModel = new TaskTreeViewModel(null, new TaskViewModel(new TaskDto("root"), null, true));
 	
 	public TaskTreeViewModel getRootTaskTreeViewModel() {
 		return rootTaskTreeViewModel;

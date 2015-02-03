@@ -1,6 +1,7 @@
 package net.d80harri.wr.ui.viewmodel;
 
 import net.d80harri.wr.service.WrService;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -11,6 +12,10 @@ public class TaskTreeViewModel extends TreeViewModel<TaskViewModel> {
 			TaskViewModel model) {
 		super(parent, model);
 	}
+	
+	public StringProperty titleProperty() {
+		return model.titleProperty();
+	}	
 
 	private ObservableList<TreeViewModel<TaskViewModel>> children;
 	@Override
@@ -44,5 +49,7 @@ public class TaskTreeViewModel extends TreeViewModel<TaskViewModel> {
 
 	public void delete(WrService service) {
 		this.model.delete(service);
-	}	
+	}
+
+
 }
