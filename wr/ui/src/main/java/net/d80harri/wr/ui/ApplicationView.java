@@ -29,8 +29,6 @@ public class ApplicationView extends BorderPane implements Initializable {
 
 	private WrService service = new WrService();
 
-	private ApplicationViewModel applicationViewModel = new ApplicationViewModel();
-
 	public ApplicationView() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
 				"/fxml/Application.fxml"));
@@ -43,9 +41,22 @@ public class ApplicationView extends BorderPane implements Initializable {
 			throw new RuntimeException(exception);
 		}
 	}
+	
+	private ApplicationViewModel applicationViewModel;
+	
+	public ApplicationViewModel getApplicationViewModel() {
+		if (applicationViewModel == null) {
+			applicationViewModel = new ApplicationViewModel();
+			applicationViewModel.getTaskTreeViewModel().selectionModelProperty().bindBidirectional(tree.selectionModelProperty());
+			tree.rootProperty().bindBidirectional(applicationViewModel.getTaskTreeViewModel().rootTaskTreeViewModelProperty());
+		}
+		return applicationViewModel;
+	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		getApplicationViewModel().load(service);
+		
 		titleColumn.setCellValueFactory(p -> { 
 			if (p.getValue().getValue() == null) {
 				return null;
@@ -53,24 +64,15 @@ public class ApplicationView extends BorderPane implements Initializable {
 				return p.getValue().getValue().titleProperty();
 			}
 		});
-		tree.setRoot(applicationViewModel.getRootTaskTreeViewModel());
-
-		menuAppendChild.setOnAction((e) -> applicationViewModel.addTaskToSelected());
-		menuReload.setOnAction((e) -> applicationViewModel.reload(service) );
+		
+		menuAppendChild.setOnAction((e) -> applicationViewModel.getTaskTreeViewModel().addTaskToSelected());
+		menuReload.setOnAction((e) -> getApplicationViewModel().getTaskTreeViewModel().reload(service) );
 		menuDeleteSubtree.setOnAction((e) -> {
-			int oldSelectIdx = applicationViewModel.getSelectedTask().getParent().getChildren().indexOf(applicationViewModel.getSelectedTask());
-			applicationViewModel.deleteSelectedSubtree(service);
+			int oldSelectIdx = getApplicationViewModel().getTaskTreeViewModel().getSelectedTask().getParent().getChildren().indexOf(applicationViewModel.getTaskTreeViewModel().getSelectedTask());
+			getApplicationViewModel().getTaskTreeViewModel().deleteSelectedSubtree(service);
 			tree.getSelectionModel().select(oldSelectIdx);
 		});
 		button.setOnAction(this::onButtonClicked);
-		
-		applicationViewModel.selectedTaskProperty().addListener((obs, o, n) -> tree.getSelectionModel().select(n));
-		tree.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> applicationViewModel.selectedTaskProperty().set(n));
-		
-//		applicationViewModel.selectedTaskProperty().bind(tree.getSelectionModel().selectedItemProperty());
-		applicationViewModel.load(service);
-		
-		applicationViewModel.selectedTaskProperty().addListener((obs, o, n) -> taskView.setModel(n.getValue()));
 	}
 
 	private void onButtonClicked(ActionEvent evt) {
