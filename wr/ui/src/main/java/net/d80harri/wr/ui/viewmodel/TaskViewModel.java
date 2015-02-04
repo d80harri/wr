@@ -1,6 +1,5 @@
 package net.d80harri.wr.ui.viewmodel;
 
-import static javafx.beans.binding.Bindings.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -8,13 +7,11 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
-import net.d80harri.wr.ui.HierarchyData;
 
-public class TaskViewModel implements HierarchyData<TaskViewModel> {
+public class TaskViewModel  {
 	private final WrService service = new WrService();
 	
 	private TaskDto task;
@@ -24,7 +21,7 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 		this.task = dto;
 		this.parent = parent;
 		if (this.parent != null)
-		this.parent.getChildren().add(this);
+		this.parent.getChildrenViews().add(this);
 		loadedProperty().set(loaded);
 	}
 	
@@ -110,11 +107,6 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 		return childrenViews;
 	}
 	
-	@Override
-	public ObservableList<TaskViewModel> getChildren() {
-		return getChildrenViews();
-	}
-	
 	private BooleanProperty loaded;
 	
 	public BooleanProperty loadedProperty() {
@@ -142,13 +134,15 @@ public class TaskViewModel implements HierarchyData<TaskViewModel> {
 		}
 	}
 
-	public void addChild(TaskDto task) {
-		this.getChildDtos().add(task);
+	public TaskViewModel addChild(TaskDto task) {
+		TaskViewModel result = new TaskViewModel(task, this, true);
+		this.getChildrenViews().add(result);
+		return result;
 	}
 	
-	public void addNewChild() {
+	public TaskViewModel addNewChild() {
 		TaskDto parent = getParent() == null ? null : getParent().task;
-		addChild(new TaskDto("Unnamed Child", parent));
+		return addChild(new TaskDto("Unnamed Child", parent));
 	}
 	
 	public void load(WrService service) {

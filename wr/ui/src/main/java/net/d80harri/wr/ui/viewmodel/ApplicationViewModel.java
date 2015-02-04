@@ -1,6 +1,5 @@
 package net.d80harri.wr.ui.viewmodel;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.BooleanProperty;
@@ -9,33 +8,45 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TreeItem;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
-import net.d80harri.wr.ui.TaskView;
 
 public class ApplicationViewModel {
 		
-	private TaskTreeViewModel rootTaskTreeViewModel = new TaskTreeViewModel(null, new TaskViewModel(new TaskDto("root"), null, true));
+	private TreeItem<TaskViewModel> rootTaskTreeViewModel;
 	
-	public TaskTreeViewModel getRootTaskTreeViewModel() {
+	public TreeItem<TaskViewModel> getRootTaskTreeViewModel() {
+		if (rootTaskTreeViewModel == null) {
+			rootTaskTreeViewModel = createRootTreeItem();			
+		}
 		return rootTaskTreeViewModel;
 	}
+
+	private ObservableList<TaskViewModel> rootTasks;
 	
-	private ObjectProperty<TaskTreeViewModel> selectedTask;
+	public ObservableList<TaskViewModel> getRootTasks() {
+		if (rootTasks == null) {
+			rootTasks = FXCollections.observableArrayList();
+		}
+		return rootTasks;
+	}
 	
-	public ObjectProperty<TaskTreeViewModel> selectedTaskProperty() {
+	private ObjectProperty<TreeItem<TaskViewModel>> selectedTask;
+	
+	public ObjectProperty<TreeItem<TaskViewModel>> selectedTaskProperty() {
 		if (selectedTask == null) {
-			selectedTask = new SimpleObjectProperty<TaskTreeViewModel>();
+			selectedTask = new SimpleObjectProperty<TreeItem<TaskViewModel>>();
 			selectedTask.addListener((obs, o, n) -> {
 				if (o != null) {
-					o.saveOrUpdate();
+					o.getValue().saveOrUpdate();
 				}
 			});
 		}
 		return selectedTask;
 	}
 	
-	public TaskTreeViewModel getSelectedTask() {
+	public TreeItem<TaskViewModel> getSelectedTask() {
 		return selectedTaskProperty().get();
 	}
 	
@@ -60,7 +71,7 @@ public class ApplicationViewModel {
 	
 	public void load(WrService service) {
 		if (!isLoaded()) {
-			getRootTaskTreeViewModel().getChildren().addAll(service.getAllTrees().stream().map((i) -> new TaskTreeViewModel(null, new TaskViewModel(i, null, true))).collect(Collectors.toList()));
+			getRootTaskTreeViewModel().getChildren().addAll(service.getAllTrees().stream().map((i) -> createTreeItem(new TaskViewModel(i, null, true))).collect(Collectors.toList()));
 			setLoaded(true);
 		}
 	}
@@ -71,13 +82,16 @@ public class ApplicationViewModel {
 		load(service);
 	}
 	
-	public TaskTreeViewModel addTaskToSelected() {
-		TaskTreeViewModel result = null;
+	public TreeItem<TaskViewModel> addTaskToSelected() {
+		TreeItem<TaskViewModel> result = null;
 		if (getSelectedTask() == null) {
 			TaskViewModel model = new TaskViewModel(new TaskDto("No title"), null, true);
-			result = new TaskTreeViewModel(getRootTaskTreeViewModel(), model);
+			result = new TreeItem<TaskViewModel>(model);
+			getRootTaskTreeViewModel().getChildren().add(result);
 		} else {
-			getSelectedTask().addNewChild();
+			TaskViewModel dto = getSelectedTask().getValue().addNewChild();
+			result = new TreeItem<TaskViewModel>(dto);
+			getSelectedTask().getChildren().add(result);
 		}
 
 		selectedTaskProperty().set(result);
@@ -85,11 +99,31 @@ public class ApplicationViewModel {
 	}
 
 	public void deleteSelectedSubtree(WrService service) {
-		getSelectedTask().delete(service);
-		if (getSelectedTask().getParent() == null) {
-			getRootTaskTreeViewModel().getChildren().remove(getSelectedTask());
+		if (getSelectedTask() != null) {
+			getSelectedTask().getValue().delete(service);
+			getSelectedTask().getParent().getChildren().remove(getSelectedTask());
 		}
 	}
 	
+	
+	private TreeItem<TaskViewModel> createRootTreeItem() {
+		TreeItem<TaskViewModel> result = new TreeItem<TaskViewModel>(new TaskViewModel(new TaskDto("root"), null, true));
+		
+		for (TaskViewModel model : getRootTasks()) {
+			result.getChildren().add(createTreeItem(model));
+		}
+		
+		return result;
+	}
+
+	private TreeItem<TaskViewModel> createTreeItem(TaskViewModel model) {
+		TreeItem<TaskViewModel> result = new TreeItem<TaskViewModel>(model);
+		
+		for (TaskViewModel child : model.getChildrenViews()) {
+			result.getChildren().add(createTreeItem(child));
+		}
+		
+		return result;
+	}
 	
 }
