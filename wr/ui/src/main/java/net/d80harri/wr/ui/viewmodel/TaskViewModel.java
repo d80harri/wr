@@ -142,7 +142,7 @@ public class TaskViewModel  {
 	
 	public TaskViewModel addNewChild() {
 		TaskDto parent = getParent() == null ? null : getParent().task;
-		return addChild(new TaskDto("Unnamed Child", parent));
+		return addChild(new TaskDto(null, parent));
 	}
 	
 	public void load(WrService service) {

@@ -4,15 +4,27 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.fxmisc.easybind.EasyBind;
+
+import javafx.beans.binding.Binding;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableStringValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
+import javafx.util.converter.DefaultStringConverter;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.ui.viewmodel.ApplicationViewModel;
 import net.d80harri.wr.ui.viewmodel.TaskViewModel;
@@ -57,6 +69,8 @@ public class ApplicationView extends BorderPane implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		getApplicationViewModel().load(service);
 		
+		taskView.modelProperty().bind(applicationViewModel.selectedInTreeProperty());
+		
 		titleColumn.setCellValueFactory(p -> { 
 			if (p.getValue().getValue() == null) {
 				return null;
@@ -64,20 +78,30 @@ public class ApplicationView extends BorderPane implements Initializable {
 				return p.getValue().getValue().titleProperty();
 			}
 		});
-		
-		menuAppendChild.setOnAction((e) -> applicationViewModel.getTaskTreeViewModel().addTaskToSelected());
-		menuReload.setOnAction((e) -> getApplicationViewModel().getTaskTreeViewModel().reload(service) );
-		menuDeleteSubtree.setOnAction((e) -> {
-			int oldSelectIdx = getApplicationViewModel().getTaskTreeViewModel().getSelectedTask().getParent().getChildren().indexOf(applicationViewModel.getTaskTreeViewModel().getSelectedTask());
-			getApplicationViewModel().getTaskTreeViewModel().deleteSelectedSubtree(service);
-			tree.getSelectionModel().select(oldSelectIdx);
+
+		titleColumn.setCellFactory(new Callback<TreeTableColumn<TaskViewModel, String>, TreeTableCell<TaskViewModel, String>>() {
+
+			@Override
+			public TreeTableCell<TaskViewModel, String> call(
+					TreeTableColumn<TaskViewModel, String> param) {
+				return new TextFieldTreeTableCell<TaskViewModel, String>(new DefaultStringConverter());
+			}
+			
 		});
-		button.setOnAction(this::onButtonClicked);
+		
+		menuAppendChild.setOnAction(this::onAppendChild);
+		menuReload.setOnAction((e) -> getApplicationViewModel().getTaskTreeViewModel().reload(service) );
+		menuDeleteSubtree.setOnAction((e) -> applicationViewModel.getTaskTreeViewModel().deleteSelectedSubtree(service));
+		button.setOnAction(this::onButtonClicked);	
+	}
+	
+	private void onAppendChild(ActionEvent evt) {
+		applicationViewModel.getTaskTreeViewModel().addTaskToSelected();
+		tree.edit(tree.getSelectionModel().getSelectedIndex(), titleColumn);
 	}
 
 	private void onButtonClicked(ActionEvent evt) {
 		System.out.println(applicationViewModel);
 	}
-
 
 }

@@ -91,6 +91,11 @@
             <artifactId>service</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
+        <dependency>
+        	<groupId>org.fxmisc.easybind</groupId>
+            <artifactId>easybind</artifactId>
+            <version>1.0.3</version>
+        </dependency>
         
         <dependency>
 			<groupId>org.assertj</groupId>

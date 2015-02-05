@@ -2,10 +2,15 @@ package net.d80harri.wr.ui.viewmodel;
 
 import java.util.stream.Collectors;
 
+import org.fxmisc.easybind.EasyBind;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -51,8 +56,24 @@ public class TaskTreeViewModel {
 		return selectionModel.get();
 	}
 	
-	public TreeItem<TaskViewModel> getSelectedTask() {
-		return getSelectionModel().getSelectedItem();
+	private ObjectProperty<TreeItem<TaskViewModel>> selectedTaskTreeItem;
+	
+	public ReadOnlyObjectProperty<TreeItem<TaskViewModel>> selectedTaskTreeItemProperty() {
+		if (selectedTaskTreeItem == null) {
+			selectedTaskTreeItem = new SimpleObjectProperty<TreeItem<TaskViewModel>>();
+			selectedTaskTreeItem.bind(EasyBind.select(selectionModelProperty()).selectObject(sm -> sm.selectedItemProperty())); // TODO: easybind
+			selectedTaskTreeItem.addListener(this::onSelectionChanged);
+		}
+		return selectedTaskTreeItem;
+	}
+	
+	private void onSelectionChanged(ObservableValue<? extends TreeItem<TaskViewModel>> obs, TreeItem<TaskViewModel> old, TreeItem<TaskViewModel> n) {
+		getSelectionModel().select(n);
+		n.getValue().saveOrUpdate();
+	}
+	
+	public TreeItem<TaskViewModel> getSelectedTaskTreeItem() {
+		return selectedTaskTreeItemProperty().get();
 	}
 	
 	public void setSelectedTask(TreeItem<TaskViewModel> selected) {
@@ -93,24 +114,32 @@ public class TaskTreeViewModel {
 	
 	public TreeItem<TaskViewModel> addTaskToSelected() {
 		TreeItem<TaskViewModel> result = null;
-		if (getSelectedTask() == null) {
+		
+		if (getSelectedTaskTreeItem() == null) {
 			TaskViewModel model = new TaskViewModel(new TaskDto("No title"), null, true);
 			result = new TreeItem<TaskViewModel>(model);
 			getRootTaskTreeItem().getChildren().add(result);
 		} else {
-			TaskViewModel dto = getSelectedTask().getValue().addNewChild();
+			TaskViewModel dto = getSelectedTaskTreeItem().getValue().addNewChild();
 			result = new TreeItem<TaskViewModel>(dto);
-			getSelectedTask().getChildren().add(result);
+			getSelectedTaskTreeItem().getChildren().add(result);
 		}
 
+		getSelectedTaskTreeItem().setExpanded(true);
 		setSelectedTask(result);
 		return result;
 	}
 
 	public void deleteSelectedSubtree(WrService service) {
-		if (getSelectedTask() != null) {
-			getSelectedTask().getValue().delete(service);
-			getSelectedTask().getParent().getChildren().remove(getSelectedTask());
+		if (getSelectedTaskTreeItem() != null) {
+			TaskViewModel toDelete = getSelectedTaskTreeItem().getValue();
+			TreeItem<TaskViewModel> nextSelect = getSelectedTaskTreeItem().nextSibling();
+			if (nextSelect == null) {
+				nextSelect = getSelectedTaskTreeItem().getParent();
+			}
+			getSelectedTaskTreeItem().getParent().getChildren().remove(getSelectedTaskTreeItem());
+			getSelectionModel().select(nextSelect);
+			toDelete.delete(service);
 		}
 	}
 	
