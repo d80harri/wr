@@ -2,9 +2,6 @@ package net.d80harri.wr.ui.viewmodel;
 
 import java.util.stream.Collectors;
 
-import org.fxmisc.easybind.EasyBind;
-
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -18,6 +15,8 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeTableView.TreeTableViewSelectionModel;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
+
+import org.fxmisc.easybind.EasyBind;
 
 public class TaskTreeViewModel {
 		
@@ -69,7 +68,13 @@ public class TaskTreeViewModel {
 	
 	private void onSelectionChanged(ObservableValue<? extends TreeItem<TaskViewModel>> obs, TreeItem<TaskViewModel> old, TreeItem<TaskViewModel> n) {
 		getSelectionModel().select(n);
-		n.getValue().saveOrUpdate();
+		if (old != this.getRootTaskTreeItem()){
+			if (old.getValue().getTitle() == null) {
+				old.getParent().getChildren().remove(old);
+			} else {
+				old.getValue().saveOrUpdate();				
+			}
+		}
 	}
 	
 	public TreeItem<TaskViewModel> getSelectedTaskTreeItem() {
@@ -112,20 +117,40 @@ public class TaskTreeViewModel {
 		load(service);
 	}
 	
+	private TreeItem<TaskViewModel> addTaskAsChild(TreeItem<TaskViewModel> parent) {
+		TreeItem<TaskViewModel> result = null;
+		
+		TaskViewModel created = parent.getValue().addNewChild();
+		result = new TreeItem<TaskViewModel>(created);
+		parent.getChildren().add(result);
+		
+		result.setExpanded(true);
+		setSelectedTask(result);
+		return result;
+	}
+	
 	public TreeItem<TaskViewModel> addTaskToSelected() {
 		TreeItem<TaskViewModel> result = null;
 		
 		if (getSelectedTaskTreeItem() == null) {
-			TaskViewModel model = new TaskViewModel(new TaskDto("No title"), null, true);
-			result = new TreeItem<TaskViewModel>(model);
-			getRootTaskTreeItem().getChildren().add(result);
+			result = addTaskAsChild(getRootTaskTreeItem());
 		} else {
-			TaskViewModel dto = getSelectedTaskTreeItem().getValue().addNewChild();
-			result = new TreeItem<TaskViewModel>(dto);
-			getSelectedTaskTreeItem().getChildren().add(result);
+			getSelectedTaskTreeItem().getValue().saveOrUpdate();
+			result = addTaskAsChild(getSelectedTaskTreeItem());
 		}
 
-		getSelectedTaskTreeItem().setExpanded(true);
+		return result;
+	}
+	
+	public TreeItem<TaskViewModel> addTaskToSelectedAsSibling() {
+		TreeItem<TaskViewModel> result = null;
+		
+		if (getSelectedTaskTreeItem() == null) {
+			// nothing to do
+		} else {
+			result = addTaskAsChild(getSelectedTaskTreeItem().getParent());
+		}
+
 		setSelectedTask(result);
 		return result;
 	}

@@ -1,29 +1,28 @@
 package net.d80harri.wr.ui;
 
+import static javafx.beans.binding.Bindings.equal;
+import static javafx.beans.binding.Bindings.isNull;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import org.fxmisc.easybind.EasyBind;
-
-import javafx.beans.binding.Binding;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableStringValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Cell;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.control.TreeTableColumn.CellEditEvent;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import javafx.util.converter.DefaultStringConverter;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.ui.viewmodel.ApplicationViewModel;
@@ -70,6 +69,12 @@ public class ApplicationView extends BorderPane implements Initializable {
 		getApplicationViewModel().load(service);
 		
 		taskView.modelProperty().bind(applicationViewModel.selectedInTreeProperty());
+		taskView.visibleProperty().bind(
+				isNull(applicationViewModel.getTaskTreeViewModel().selectedTaskTreeItemProperty()).not()
+				.or(
+						equal(
+								applicationViewModel.getTaskTreeViewModel().selectedTaskTreeItemProperty(), 
+								getApplicationViewModel().getTaskTreeViewModel().rootTaskTreeViewModelProperty()).not()));
 		
 		titleColumn.setCellValueFactory(p -> { 
 			if (p.getValue().getValue() == null) {
@@ -84,15 +89,26 @@ public class ApplicationView extends BorderPane implements Initializable {
 			@Override
 			public TreeTableCell<TaskViewModel, String> call(
 					TreeTableColumn<TaskViewModel, String> param) {
-				return new TextFieldTreeTableCell<TaskViewModel, String>(new DefaultStringConverter());
+				TextFieldTreeTableCell<TaskViewModel, String> result = new TextFieldTreeTableCell<TaskViewModel, String>(new DefaultStringConverter());
+
+				return result;
 			}
 			
 		});
+		
+		titleColumn.setOnEditCommit(this::onTreeTableColumnEditCommit);
 		
 		menuAppendChild.setOnAction(this::onAppendChild);
 		menuReload.setOnAction((e) -> getApplicationViewModel().getTaskTreeViewModel().reload(service) );
 		menuDeleteSubtree.setOnAction((e) -> applicationViewModel.getTaskTreeViewModel().deleteSelectedSubtree(service));
 		button.setOnAction(this::onButtonClicked);	
+	}
+	
+	private void onTreeTableColumnEditCommit(CellEditEvent<TaskViewModel, String> event) {
+		applicationViewModel.getTaskTreeViewModel().getSelectedTaskTreeItem().getValue().setTitle(event.getNewValue());
+		TreeItem<TaskViewModel> created = applicationViewModel.getTaskTreeViewModel().addTaskToSelectedAsSibling();
+		
+		tree.edit(tree.getSelectionModel().getSelectedIndex(), titleColumn);
 	}
 	
 	private void onAppendChild(ActionEvent evt) {
