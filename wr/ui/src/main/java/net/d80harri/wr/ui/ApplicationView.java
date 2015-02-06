@@ -8,18 +8,16 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Cell;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
@@ -106,13 +104,15 @@ public class ApplicationView extends BorderPane implements Initializable {
 	
 	private void onTreeTableColumnEditCommit(CellEditEvent<TaskViewModel, String> event) {
 		applicationViewModel.getTaskTreeViewModel().getSelectedTaskTreeItem().getValue().setTitle(event.getNewValue());
+		event.getRowValue().getValue().saveOrUpdate();
 		TreeItem<TaskViewModel> created = applicationViewModel.getTaskTreeViewModel().addTaskToSelectedAsSibling();
-		
+//		tree.getSelectionModel().select(created);
 		tree.edit(tree.getSelectionModel().getSelectedIndex(), titleColumn);
 	}
 	
 	private void onAppendChild(ActionEvent evt) {
-		applicationViewModel.getTaskTreeViewModel().addTaskToSelected();
+		getApplicationViewModel().getTaskTreeViewModel().getSelectedTaskTreeItem().setExpanded(true);
+		TreeItem<TaskViewModel> newItem = applicationViewModel.getTaskTreeViewModel().addTaskToSelected();
 		tree.edit(tree.getSelectionModel().getSelectedIndex(), titleColumn);
 	}
 

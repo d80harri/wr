@@ -7,7 +7,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -61,20 +60,8 @@ public class TaskTreeViewModel {
 		if (selectedTaskTreeItem == null) {
 			selectedTaskTreeItem = new SimpleObjectProperty<TreeItem<TaskViewModel>>();
 			selectedTaskTreeItem.bind(EasyBind.select(selectionModelProperty()).selectObject(sm -> sm.selectedItemProperty())); // TODO: easybind
-			selectedTaskTreeItem.addListener(this::onSelectionChanged);
 		}
 		return selectedTaskTreeItem;
-	}
-	
-	private void onSelectionChanged(ObservableValue<? extends TreeItem<TaskViewModel>> obs, TreeItem<TaskViewModel> old, TreeItem<TaskViewModel> n) {
-		getSelectionModel().select(n);
-		if (old != this.getRootTaskTreeItem()){
-			if (old.getValue().getTitle() == null) {
-				old.getParent().getChildren().remove(old);
-			} else {
-				old.getValue().saveOrUpdate();				
-			}
-		}
 	}
 	
 	public TreeItem<TaskViewModel> getSelectedTaskTreeItem() {
@@ -135,7 +122,6 @@ public class TaskTreeViewModel {
 		if (getSelectedTaskTreeItem() == null) {
 			result = addTaskAsChild(getRootTaskTreeItem());
 		} else {
-			getSelectedTaskTreeItem().getValue().saveOrUpdate();
 			result = addTaskAsChild(getSelectedTaskTreeItem());
 		}
 

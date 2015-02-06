@@ -20,7 +20,7 @@
       <items>
         <TreeTableView  fx:id="tree" prefHeight="574.0" prefWidth="100.0" showRoot="false" editable="true">
         	<columns>
-        		<TreeTableColumn fx:id="titleColumn" text="Title" minWidth="300" >
+        		<TreeTableColumn fx:id="titleColumn" text="Title" minWidth="300" editable="true" >
         		</TreeTableColumn>
         	</columns>
         </TreeTableView>
