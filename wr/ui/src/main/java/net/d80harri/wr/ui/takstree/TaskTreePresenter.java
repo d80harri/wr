@@ -12,6 +12,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -23,6 +24,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
+
+import org.fxmisc.easybind.EasyBind;
 
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
@@ -67,8 +70,10 @@ public class TaskTreePresenter implements Initializable {
 	}
 	
 	private void load() {
-		model = createRootModel(service.getAllTrees());
+		model = new TaskPresentationModel();
 		tree.setRoot(createTreeItem(model));
+		
+		model.getChildren().addAll(createRootModel(service.getAllTrees()).getChildren());
 	}
 	
 	private TaskPresentationModel createRootModel(Collection<TaskDto> trees) {
@@ -92,7 +97,14 @@ public class TaskTreePresenter implements Initializable {
 	private TreeItem<TaskPresentationModel> createTreeItem(
 			TaskPresentationModel model) {
 		TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>(model);
-		listBind(result.getChildren(), map(model.getChildren(), i -> createTreeItem(i)));
+		
+		ObservableList<TreeItem<TaskPresentationModel>> readableTreeItemds = map(model.getChildren(), i -> createTreeItem(i));
+		ObservableList<TaskPresentationModel> readableTasks = map(result.getChildren(), i -> i.getValue());
+		
+		listBind(model.getChildren(), readableTasks);
+		listBind(result.getChildren(), readableTreeItemds);
+		
+//		listBind(result.getChildren(), );
 		return result;
 	}
 	
@@ -129,13 +141,13 @@ public class TaskTreePresenter implements Initializable {
 	}
 
 	private void indentTask() {
-		doWithSelectedTask(s -> {
+		doWithSelectedTreeItem(s -> {
 			int idx = s.getParent().getChildren().indexOf(s);
 			if (idx != 0) {
-				DebugUtils.printTreeStructure(s.getParent(), 0, i -> i.getChildren());
-				TaskPresentationModel precessor = s.getParent().getChildren().get(idx-1);
+				TreeItem<TaskPresentationModel> precessor = s.getParent().getChildren().get(idx-1);
 				precessor.getChildren().add(s);
-				DebugUtils.printTreeStructure(precessor, 0, i -> i.getChildren());
+				tree.getSelectionModel().select(precessor);
+				precessor.getParent().setExpanded(true);
 			}
 		});
 	}
@@ -166,6 +178,13 @@ public class TaskTreePresenter implements Initializable {
 		TreeItem<TaskPresentationModel> selectedItem = tree.getSelectionModel().getSelectedItem();
 		if (selectedItem.getValue() != this.model) {
 			func.accept(selectedItem.getValue());
+		}
+	}
+	
+	private void doWithSelectedTreeItem(Consumer<TreeItem<TaskPresentationModel>> func) {
+		TreeItem<TaskPresentationModel> selectedItem = tree.getSelectionModel().getSelectedItem();
+		if (selectedItem.getValue() != this.model) {
+			func.accept(selectedItem);
 		}
 	}
 }
