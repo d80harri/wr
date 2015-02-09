@@ -104,7 +104,7 @@ public class TaskTreePresenter implements Initializable {
 			evt.consume(); 
 			break;
 		case TAB:
-			if (evt.isControlDown()) {
+			if (evt.isShiftDown()) {
 				outdentTask();
 			} else {
 				indentTask();
