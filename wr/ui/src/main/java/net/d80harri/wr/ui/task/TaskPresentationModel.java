@@ -1,14 +1,5 @@
 package net.d80harri.wr.ui.task;
 
-import static org.fxmisc.easybind.EasyBind.listBind;
-import static org.fxmisc.easybind.EasyBind.map;
-import static org.fxmisc.easybind.EasyBind.subscribe;
-
-import java.util.stream.Collectors;
-
-import org.fxmisc.easybind.EasyBind;
-
-import javafx.beans.binding.Binding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -20,22 +11,13 @@ import javafx.collections.ObservableList;
 import net.d80harri.wr.service.model.TaskDto;
 
 public class TaskPresentationModel {
-	public static final TaskDto NULL_TASK = new TaskDto();
-
-	private final TaskDto model;
 
 	public TaskPresentationModel() {
-		model = NULL_TASK;
-	}
-
-	public TaskDto getModel() {
-		return model;
+		
 	}
 
 	public TaskPresentationModel(TaskDto task) {
-		this.model = task;
 		setTitle(task.getTitle());
-		getChildren().addAll(task.getChildren().stream().map(i -> new TaskPresentationModel(i)).collect(Collectors.toList()));
 		id = new SimpleObjectProperty<Long>(task.getId());
 	}
 
@@ -54,7 +36,6 @@ public class TaskPresentationModel {
 	public StringProperty titleProperty() {
 		if (title == null) {
 			title = new SimpleStringProperty();
-			subscribe(title, model::setTitle);
 		}
 		return title;
 	}
@@ -72,7 +53,7 @@ public class TaskPresentationModel {
 	public ObservableList<TaskPresentationModel> getChildren() {
 		if (children == null) {
 			children = FXCollections.observableArrayList();
-			listBind(model.getChildren(), map(children, i -> i.model));
+//			listBind(model.getChildren(), map(children, i -> i.model));
 			children.addListener(new ListChangeListener<TaskPresentationModel>() {
 
 				@Override
@@ -90,8 +71,7 @@ public class TaskPresentationModel {
 								delChildren.setParent(null);
 							}
 							for (TaskPresentationModel addChildren : c.getAddedSubList()) {
-								if (addChildren.getParent() != TaskPresentationModel.this)
-									addChildren.setParent(TaskPresentationModel.this);
+								addChildren.setParent(TaskPresentationModel.this);
 							}
 						}
 					}
@@ -108,16 +88,8 @@ public class TaskPresentationModel {
 			parent = new SimpleObjectProperty<TaskPresentationModel>();
 			
 			parent.addListener((obs, o, n) -> {
-				if (n == null) {
-					model.setParent(null);
-				} else {
-					model.setParent(n.model.getParent());
-					if (!n.getChildren().contains(this))
-					n.getChildren().add(this);
-				}
-
-				if (o != null) {
-					o.getChildren().remove(this);
+				if (n != null) {
+					n.addChild(this);
 				}
 			});
 		}
@@ -129,7 +101,22 @@ public class TaskPresentationModel {
 	}
 
 	public void setParent(TaskPresentationModel parent) {
-		parentProperty().set(parent);
+		if (this.getParent() != parent) {
+			if (this.getParent() != null) {
+				this.getParent().getChildren().remove(this);
+			}
+			parentProperty().set(parent);
+			if (this.getParent() != null) {
+				parentProperty().get().addChild(this);
+			}
+		}
+	}
+	
+	public void addChild(TaskPresentationModel child) {
+		if (!this.getChildren().contains(child)) {
+			getChildren().add(child);
+			setParent(this);
+		}
 	}
 	
 	@Override

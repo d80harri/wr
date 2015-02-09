@@ -10,8 +10,8 @@ import javafx.stage.Stage;
 
 public class App extends Application {
 
-//	private static final String DB_URL = "jdbc:h2:~/prod;AUTO_SERVER=true";
-	private static final String DB_URL = "jdbc:h2:~/wr;AUTO_SERVER=true";
+	private static final String DB_URL = "jdbc:h2:~/prod;AUTO_SERVER=true";
+//	private static final String DB_URL = "jdbc:h2:~/wr;AUTO_SERVER=true";
 	
 	@Override
 	public void start(Stage stage) throws Exception {

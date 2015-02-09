@@ -4,19 +4,14 @@ import static org.fxmisc.easybind.EasyBind.listBind;
 import static org.fxmisc.easybind.EasyBind.map;
 
 import java.net.URL;
-import java.util.List;
+import java.util.Collection;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -29,11 +24,10 @@ import javafx.util.Callback;
 
 import javax.inject.Inject;
 
-import org.fxmisc.easybind.EasyBind;
-
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
+import net.d80harri.wr.ui.utils.DebugUtils;
 
 public class TaskTreePresenter implements Initializable {
 	@FXML private TreeTableView<TaskPresentationModel> tree;
@@ -73,49 +67,32 @@ public class TaskTreePresenter implements Initializable {
 	}
 	
 	private void load() {
-		model = new TaskPresentationModel();
-
+		model = createRootModel(service.getAllTrees());
 		tree.setRoot(createTreeItem(model));
-		
-		for (TaskDto dto : service.getAllTrees()) {
-			TaskPresentationModel tpm = new TaskPresentationModel(dto);
-			model.getChildren().add(tpm);
-		}
-		model.getChildren().addAll(service.getAllTrees().stream()
-				.map(i -> new TaskPresentationModel(i))
-				.collect(Collectors.toList()));
 	}
-
-	private TaskPresentationModel createModel(List<TaskDto> allTrees) {
-		TaskPresentationModel model = new TaskPresentationModel();
-		model.getChildren().addAll(allTrees.stream()
-				.map(i -> new TaskPresentationModel(i)) 
-				.collect(Collectors.toList()));
-		return model;
+	
+	private TaskPresentationModel createRootModel(Collection<TaskDto> trees) {
+		TaskPresentationModel result = new TaskPresentationModel();
+		for (TaskDto dto : trees) {
+			result.getChildren().add(createModel(dto));
+		}
+		return result;
+	}
+	
+	private TaskPresentationModel createModel(TaskDto dto) {
+		TaskPresentationModel result = new TaskPresentationModel(dto);
+		
+		for (TaskDto child : dto.getChildren()) {
+			result.getChildren().add(createModel(child));
+		}
+		
+		return result;
 	}
 
 	private TreeItem<TaskPresentationModel> createTreeItem(
 			TaskPresentationModel model) {
 		TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>(model);
-		listBind(result.getChildren(), map(model.getChildren(), i -> new TreeItem<TaskPresentationModel>(i)));
-		model.getChildren().addListener(new ListChangeListener<TaskPresentationModel>() {
-
-			@Override
-			public void onChanged(
-					javafx.collections.ListChangeListener.Change<? extends TaskPresentationModel> c) {
-				while (c.next()) {
-					if (c.wasAdded()) {
-						for (TaskPresentationModel added : c.getAddedSubList()) {
-							result.getChildren().addAll(createTreeItem(added));
-						}
-					}
-				}
-			}
-			
-		});
-//		for (TaskPresentationModel child : model.getChildren()) {
-//			createTreeItem(child);
-//		}
+		listBind(result.getChildren(), map(model.getChildren(), i -> createTreeItem(i)));
 		return result;
 	}
 	
@@ -127,7 +104,7 @@ public class TaskTreePresenter implements Initializable {
 			evt.consume(); 
 			break;
 		case TAB:
-			if (evt.isAltDown()) {
+			if (evt.isControlDown()) {
 				outdentTask();
 			} else {
 				indentTask();
@@ -155,19 +132,29 @@ public class TaskTreePresenter implements Initializable {
 		doWithSelectedTask(s -> {
 			int idx = s.getParent().getChildren().indexOf(s);
 			if (idx != 0) {
+				DebugUtils.printTreeStructure(s.getParent(), 0, i -> i.getChildren());
 				TaskPresentationModel precessor = s.getParent().getChildren().get(idx-1);
 				precessor.getChildren().add(s);
+				DebugUtils.printTreeStructure(precessor, 0, i -> i.getChildren());
 			}
 		});
 	}
 
 	private void outdentTask() {
-		throw new RuntimeException("NYI");
+		doWithSelectedTask(s -> {
+			TaskPresentationModel grandParent = s.getParent().getParent();
+			if (grandParent != null) {
+				int idxOfParent = grandParent.getChildren().indexOf(s.getParent());
+				grandParent.getChildren().add(idxOfParent+1, s);
+			}
+		});
 	}
 
 	private void addSiblingTask() {
 		doWithSelectedTask(s -> {
-			s.getParent().getChildren().add(new TaskPresentationModel(new TaskDto("new")));
+			int idxOfSelected = s.getParent().getChildren().indexOf(s);
+			
+			s.getParent().getChildren().add(idxOfSelected+1, new TaskPresentationModel(new TaskDto("new")));
 		});
 	}
 	
@@ -177,8 +164,7 @@ public class TaskTreePresenter implements Initializable {
 	
 	private void doWithSelectedTask(Consumer<TaskPresentationModel> func) {
 		TreeItem<TaskPresentationModel> selectedItem = tree.getSelectionModel().getSelectedItem();
-		TaskDto selectedTask = selectedItem.getValue().getModel();
-		if (selectedTask != TaskPresentationModel.NULL_TASK) {
+		if (selectedItem.getValue() != this.model) {
 			func.accept(selectedItem.getValue());
 		}
 	}
