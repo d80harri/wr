@@ -21,6 +21,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
 import org.assertj.core.api.Assertions;
+import org.fxmisc.easybind.EasyBind;
 import org.junit.Test;
 
 public class BindingsTest {
@@ -83,5 +84,18 @@ public class BindingsTest {
 		string.add("1");
 		Assertions.assertThat(intsUpdate.get()).isEqualTo(2);
 		Assertions.assertThat(stringUpdate.get()).isEqualTo(2);
+	}
+	
+	@Test
+	public void test1() throws Throwable {
+		ObservableList<Integer> ints = FXCollections.observableArrayList();
+		ObservableList<String> strs = FXCollections.observableArrayList();
+		
+		EasyBind.listBind(strs, EasyBind.map(ints, i -> Integer.toString(i)));
+		EasyBind.listBind(ints, EasyBind.map(strs, i -> Integer.parseInt(i)));
+		
+		ints.add(1);
+		
+		Assertions.assertThat(strs).contains("1");
 	}
 }
