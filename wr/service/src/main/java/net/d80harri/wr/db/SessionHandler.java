@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 import liquibase.Contexts;
@@ -17,8 +16,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import net.d80harri.wr.db.model.Task;
-import net.d80harri.wr.service.WrService;
-import net.d80harri.wr.service.model.TaskDto;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -51,7 +48,8 @@ public class SessionHandler implements Closeable {
 						"org.h2.Driver")
 				.setProperty("hibernate.connection.url", url)
 				.setProperty("hibernate.current_session_context_class",
-						"managed").setProperty("hibernate.show_sql", "true");
+						"managed").setProperty("hibernate.show_sql", "true")
+						.setProperty("hibernate.connection.pool_size", "1");
 
 		Reflections r = new Reflections("net.d80harri");
 		for (Class<?> clazz : r.getTypesAnnotatedWith(Table.class)) {

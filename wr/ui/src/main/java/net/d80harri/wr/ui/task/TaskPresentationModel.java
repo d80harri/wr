@@ -49,94 +49,9 @@ public class TaskPresentationModel {
 	public void setTitle(String title) {
 		titleProperty().set(title);
 	}
-
-	private ObservableList<TaskPresentationModel> children;
-
-	public ObservableList<TaskPresentationModel> getChildren() {
-		if (children == null) {
-			children = FXCollections.observableArrayList();
-//			listBind(model.getChildren(), map(children, i -> i.model));
-			children.addListener(new ListChangeListener<TaskPresentationModel>() {
-
-				@Override
-				public void onChanged(
-						javafx.collections.ListChangeListener.Change<? extends TaskPresentationModel> c) {
-					while (c.next()) {
-						if (c.wasPermutated()) {
-							for (int i = c.getFrom(); i < c.getTo(); ++i) {
-								// permutate
-							}
-						} else if (c.wasUpdated()) {
-							// update item
-						} else {
-							for (TaskPresentationModel delChildren : c.getRemoved()) {
-								delChildren.setParent(null);
-							}
-							for (TaskPresentationModel addChildren : c.getAddedSubList()) {
-								addChildren.setParent(TaskPresentationModel.this);
-							}
-						}
-					}
-				}
-			});
-		}
-		return children;
-	}
-
-	private ObjectProperty<TaskPresentationModel> parent = null;
-
-	public ObjectProperty<TaskPresentationModel> parentProperty() {
-		if (parent == null) {
-			parent = new SimpleObjectProperty<TaskPresentationModel>();
-			
-			parent.addListener((obs, o, n) -> {
-				if (n != null) {
-					n.addChild(this);
-				}
-			});
-		}
-		return parent;
-	}
-
-	public TaskPresentationModel getParent() {
-		return parentProperty().get();
-	}
-
-	public void setParent(TaskPresentationModel parent) {
-		if (this.getParent() != parent) {
-			if (this.getParent() != null) {
-				this.getParent().getChildren().remove(this);
-			}
-			parentProperty().set(parent);
-			if (this.getParent() != null) {
-				parentProperty().get().addChild(this);
-			}
-		}
-	}
-	
-	public void addChild(TaskPresentationModel child) {
-		if (!this.getChildren().contains(child)) {
-			getChildren().add(child);
-			setParent(this);
-		}
-	}
-	
-	private BooleanProperty selected = new SimpleBooleanProperty();
-	
-	public BooleanProperty selectedProperty() {
-		return selected;
-	}
-	
-	public boolean isSelected() {
-		return selectedProperty().get();
-	}
-	
-	public void setSelected(boolean selected) {
-		selectedProperty().set(selected);
-	}
 	
 	@Override
 	public String toString() {
-		return getTitle() + " " + getChildren().size();
+		return getTitle();
 	}
 }
