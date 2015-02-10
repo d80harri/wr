@@ -24,6 +24,8 @@ import javafx.util.Callback;
 
 import javax.inject.Inject;
 
+import org.fxmisc.easybind.EasyBind;
+
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
@@ -93,6 +95,18 @@ public class TaskTreePresenter implements Initializable {
 			TaskPresentationModel model) {
 		TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>(model);
 		listBind(result.getChildren(), map(model.getChildren(), i -> createTreeItem(i)));
+		
+		tree.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
+			o.getValue().setSelected(false);
+			n.getValue().setSelected(true);
+		});
+//		model.selectedProperty().bind(Bindings.equal(result, tree.getSelectionModel().selectedItemProperty()));
+		model.selectedProperty().addListener((obs, o, n) -> {
+			if (n) {
+				tree.getSelectionModel().select(result);
+			}
+		});
+			
 		return result;
 	}
 	
@@ -146,6 +160,7 @@ public class TaskTreePresenter implements Initializable {
 			if (grandParent != null) {
 				int idxOfParent = grandParent.getChildren().indexOf(s.getParent());
 				grandParent.getChildren().add(idxOfParent+1, s);
+				s.setSelected(true);
 			}
 		});
 	}

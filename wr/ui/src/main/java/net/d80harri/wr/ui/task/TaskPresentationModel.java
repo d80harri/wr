@@ -1,7 +1,9 @@
 package net.d80harri.wr.ui.task;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -117,6 +119,20 @@ public class TaskPresentationModel {
 			getChildren().add(child);
 			setParent(this);
 		}
+	}
+	
+	private BooleanProperty selected = new SimpleBooleanProperty();
+	
+	public BooleanProperty selectedProperty() {
+		return selected;
+	}
+	
+	public boolean isSelected() {
+		return selectedProperty().get();
+	}
+	
+	public void setSelected(boolean selected) {
+		selectedProperty().set(selected);
 	}
 	
 	@Override
