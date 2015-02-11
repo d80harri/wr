@@ -1,9 +1,11 @@
 package net.d80harri.wr.ui.task;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -50,38 +52,9 @@ public class TaskPresentationModel {
 		titleProperty().set(title);
 	}
 
-	private ObservableList<TaskPresentationModel> children;
+	private ObservableList<TaskPresentationModel> children = FXCollections.observableArrayList();
 
-	public ObservableList<TaskPresentationModel> getChildren() {
-		if (children == null) {
-			children = FXCollections.observableArrayList();
-//			listBind(model.getChildren(), map(children, i -> i.model));
-			children.addListener(new ListChangeListener<TaskPresentationModel>() {
-
-				@Override
-				public void onChanged(
-						javafx.collections.ListChangeListener.Change<? extends TaskPresentationModel> c) {
-					while (c.next()) {
-						if (c.wasPermutated()) {
-							for (int i = c.getFrom(); i < c.getTo(); ++i) {
-								// permutate
-							}
-						} else if (c.wasUpdated()) {
-							// update item
-						} else {
-							for (TaskPresentationModel delChildren : c.getRemoved()) {
-								delChildren.setParent(null);
-							}
-							for (TaskPresentationModel addChildren : c.getAddedSubList()) {
-								addChildren.setParent(TaskPresentationModel.this);
-							}
-						}
-					}
-				}
-			});
-		}
-		return children;
-	}
+	
 
 	private ObjectProperty<TaskPresentationModel> parent = null;
 
@@ -139,4 +112,9 @@ public class TaskPresentationModel {
 	public String toString() {
 		return getTitle() + " " + getChildren().size();
 	}
+
+	public final javafx.collections.ObservableList<net.d80harri.wr.ui.task.TaskPresentationModel> getChildren() {
+		return this.children;
+	}
+
 }
