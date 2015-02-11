@@ -119,7 +119,8 @@ public class TaskTreePresenter implements Initializable {
 				result.valueProperty().bind(rootModel);
 
 				Bindings.bindContent(result.getChildren(),
-						createTreeItemListBinding(rootModel.getValue().getChildren()));
+						createTreeItemListBinding(rootModel.getValue()
+								.getChildren()));
 				return result;
 			}
 
@@ -229,11 +230,11 @@ public class TaskTreePresenter implements Initializable {
 	}
 
 	private void doWithSelectedTask(Consumer<TaskPresentationModel> func) {
-		// TreeItem<TaskPresentationModel> selectedItem =
-		// tree.getSelectionModel().getSelectedItem();
-		// if (selectedItem.getValue() != this.model) {
-		// func.accept(selectedItem.getValue());
-		// }
+		TreeItem<TaskPresentationModel> selectedItem = tree.getSelectionModel()
+				.getSelectedItem();
+		if (selectedItem.getValue() != this.getModel().getRootModel()) {
+			func.accept(selectedItem.getValue());
+		}
 	}
 
 	public final ObjectProperty<TaskTreePresentationModel> modelProperty() {
