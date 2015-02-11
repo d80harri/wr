@@ -2,6 +2,7 @@ package net.d80harri.wr.ui.takstree;
 
 import java.util.List;
 
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import net.d80harri.wr.service.WrService;
@@ -11,6 +12,10 @@ import net.d80harri.wr.ui.task.TaskPresentationModel;
 public class TaskTreePresentationModel {
 	private final ObjectProperty<TaskPresentationModel> rootModel = new SimpleObjectProperty<TaskPresentationModel>(this, "rootModel", new TaskPresentationModel());
 	private ObjectProperty<TaskPresentationModel> selectedModel = new SimpleObjectProperty<TaskPresentationModel>(this, "selectedModel", null);
+
+	public TaskTreePresentationModel() {
+		
+	}
 
 	public final ObjectProperty<TaskPresentationModel> selectedModelProperty() {
 		return this.selectedModel;

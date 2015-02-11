@@ -121,6 +121,7 @@ public class TaskTreePresenter implements Initializable {
 				Bindings.bindContent(result.getChildren(),
 						createTreeItemListBinding(rootModel.getValue()
 								.getChildren()));
+
 				return result;
 			}
 
@@ -143,8 +144,10 @@ public class TaskTreePresenter implements Initializable {
 				for (TaskPresentationModel child : children) {
 					TreeItem<TaskPresentationModel> childItem = new TreeItem<TaskPresentationModel>(
 							child);
+					
 					Bindings.bindContent(childItem.getChildren(),
 							createTreeItemListBinding(child.getChildren()));
+					
 					result.add(childItem);
 				}
 				return result;
