@@ -51,7 +51,8 @@ public class SessionHandler implements Closeable {
 						"org.h2.Driver")
 				.setProperty("hibernate.connection.url", url)
 				.setProperty("hibernate.current_session_context_class",
-						"managed").setProperty("hibernate.show_sql", "true");
+						"managed").setProperty("hibernate.connection.pool_size", "1")
+						.setProperty("hibernate.show_sql", "true");
 
 		Reflections r = new Reflections("net.d80harri");
 		for (Class<?> clazz : r.getTypesAnnotatedWith(Table.class)) {

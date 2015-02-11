@@ -117,11 +117,11 @@ public class TaskPresentationModel {
 	public void addChild(TaskPresentationModel child) {
 		if (!this.getChildren().contains(child)) {
 			getChildren().add(child);
-			setParent(this);
+			child.setParent(this);
 		}
 	}
 	
-	private BooleanProperty selected = new SimpleBooleanProperty();
+	private BooleanProperty selected = new SimpleBooleanProperty(this, "selected");
 	
 	public BooleanProperty selectedProperty() {
 		return selected;

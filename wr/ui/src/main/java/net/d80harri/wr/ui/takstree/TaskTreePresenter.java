@@ -9,8 +9,10 @@ import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -70,7 +72,10 @@ public class TaskTreePresenter implements Initializable {
 	
 	private void load() {
 		model = createRootModel(service.getAllTrees());
-		tree.setRoot(createTreeItem(model));
+		TreeItem<TaskPresentationModel> rootItem = createTreeItem(model);
+		tree.setRoot(rootItem);
+		
+		
 	}
 	
 	private TaskPresentationModel createRootModel(Collection<TaskDto> trees) {
@@ -91,24 +96,46 @@ public class TaskTreePresenter implements Initializable {
 		return result;
 	}
 
-	private TreeItem<TaskPresentationModel> createTreeItem(
-			TaskPresentationModel model) {
-		TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>(model);
-		listBind(result.getChildren(), map(model.getChildren(), i -> createTreeItem(i)));
-		
+	private TreeItem<TaskPresentationModel> createTreeItem(TaskPresentationModel model) {
 		tree.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
-			o.getValue().setSelected(false);
-			n.getValue().setSelected(true);
-		});
-//		model.selectedProperty().bind(Bindings.equal(result, tree.getSelectionModel().selectedItemProperty()));
-		model.selectedProperty().addListener((obs, o, n) -> {
-			if (n) {
-				tree.getSelectionModel().select(result);
+			if (o != null) {
+				o.getValue().setSelected(false);
+			}
+			if (n != null) {
+				n.getValue().setSelected(true);
 			}
 		});
-			
+		return createTreeItemRecursive(model);
+	}
+	
+	private TreeItem<TaskPresentationModel> createTreeItemRecursive(
+			TaskPresentationModel model) {
+		TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>(model);
+		listBind(result.getChildren(), map(model.getChildren(), i -> createTreeItemRecursive(i)));
+		
+		
+		model.selectedProperty().bind(Bindings.equal(result, tree.getSelectionModel().selectedItemProperty()));
+//		model.selectedProperty().addListener(selectedPropertyListener);
+		
+
+//		result.addEventHandler(TreeItem.<TaskPresentationModel>childrenModificationEvent(), 
+//				e -> e.getRemovedChildren().forEach(ti -> {
+//						ti.getValue().selectedProperty().removeListener(selectedPropertyListener);
+//					}));
 		return result;
 	}
+	
+//	private ChangeListener<? super Boolean> selectedPropertyListener = new ChangeListener<Boolean>() {
+//
+//		@Override
+//		public void changed(ObservableValue<? extends Boolean> observable,
+//				Boolean oldValue, Boolean newValue) {
+//			if (newValue) {
+//				TaskPresentationModel selectedItem = (TaskPresentationModel) ((BooleanProperty)observable).getBean();
+//				tree.getSelectionModel().select(selectedItem);
+//			}
+//		}
+//	};
 	
 	@FXML
 	private void onKeyPressedInTable(KeyEvent evt) {
@@ -148,7 +175,7 @@ public class TaskTreePresenter implements Initializable {
 			if (idx != 0) {
 				DebugUtils.printTreeStructure(s.getParent(), 0, i -> i.getChildren());
 				TaskPresentationModel precessor = s.getParent().getChildren().get(idx-1);
-				precessor.getChildren().add(s);
+				precessor.addChild(s);
 				DebugUtils.printTreeStructure(precessor, 0, i -> i.getChildren());
 			}
 		});
