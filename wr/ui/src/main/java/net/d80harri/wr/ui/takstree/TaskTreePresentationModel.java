@@ -47,6 +47,16 @@ public class TaskTreePresentationModel {
 		this.setRootModel(createRootModel(service.getAllTrees()));
 	}
 	
+	public void select(TaskPresentationModel selected) {
+		if (this.getSelectedModel() != null) {
+			this.getSelectedModel().setSelected(false);			
+		}
+		if (selected != null) {
+			selected.setSelected(true);
+		}
+		this.setSelectedModel(selected);
+	}
+	
 	
 	public TaskPresentationModel createRootModel(List<TaskDto> rootDtos) {
 		TaskPresentationModel result = new TaskPresentationModel();

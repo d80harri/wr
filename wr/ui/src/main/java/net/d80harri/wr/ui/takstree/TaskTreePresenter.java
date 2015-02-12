@@ -1,15 +1,16 @@
 package net.d80harri.wr.ui.takstree;
 
+import static org.fxmisc.easybind.EasyBind.select;
+import static org.fxmisc.easybind.EasyBind.subscribe;
+
 import java.net.URL;
-import java.util.Collection;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -27,12 +28,8 @@ import javafx.util.Callback;
 
 import javax.inject.Inject;
 
-import org.fxmisc.easybind.EasyBind;
-import org.fxmisc.easybind.monadic.MonadicBinding;
-
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
-import net.d80harri.wr.ui.takstree.binding.TaskTreeBinding;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
 import net.d80harri.wr.ui.utils.DebugUtils;
 
@@ -85,22 +82,25 @@ public class TaskTreePresenter implements Initializable {
 
 	private void load() {
 		tree.rootProperty().bind(createTreeItemBinding(this.model));
+		subscribe(
+				select(tree.selectionModelProperty()).selectObject(sm -> sm.selectedItemProperty()),
+				c -> {
+					Platform.runLater(() -> getModel().select(c == null ? null : c.getValue()));
+				});
+		subscribe(select(modelProperty()).selectObject(m -> m.selectedModelProperty()),
+				c -> tree.getSelectionModel().select(findTreeItem(c)));
 		getModel().load(service);
-		//
-		// model = createRootModel(service.getAllTrees());
-		// TreeItem<TaskPresentationModel> rootItem = new TaskTreeBinding(model,
-		// tree).get();
-		// tree.setRoot(rootItem);
-		//
-		// tree.getSelectionModel().selectedItemProperty().addListener((obs, o,
-		// n) -> {
-		// if (o != null) {
-		// o.getValue().setSelected(false);
-		// }
-		// if (n != null) {
-		// n.getValue().setSelected(true);
-		// }
-		// });
+	}
+	
+	private TreeItem<TaskPresentationModel> findTreeItem(TaskPresentationModel model) {
+		for (TreeItem<TaskPresentationModel> item : tree.getRoot().getChildren()) {
+			if (item.getValue() == model) {
+				return item;
+			} else {
+				return findTreeItem(item.getValue());
+			}
+		}
+		return null;
 	}
 
 	private ObservableValue<? extends TreeItem<TaskPresentationModel>> createTreeItemBinding(
@@ -112,8 +112,7 @@ public class TaskTreePresenter implements Initializable {
 
 			@Override
 			protected TreeItem<TaskPresentationModel> computeValue() {
-				ObservableValue<TaskPresentationModel> rootModel = EasyBind
-						.select(model).selectObject(m -> m.rootModelProperty());
+				ObservableValue<TaskPresentationModel> rootModel = select(model).selectObject(m -> m.rootModelProperty());
 
 				TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>();
 				result.valueProperty().bind(rootModel);
@@ -197,7 +196,7 @@ public class TaskTreePresenter implements Initializable {
 				TaskPresentationModel precessor = s.getParent().getChildren()
 						.get(idx - 1);
 				precessor.addChild(s);
-				s.setSelected(true);
+				this.getModel().select(s);
 				DebugUtils.printTreeStructure(precessor, 0,
 						i -> i.getChildren());
 			}
@@ -228,8 +227,7 @@ public class TaskTreePresenter implements Initializable {
 	}
 
 	private void addRootTask() {
-		// model.getChildren().add(new TaskPresentationModel(new
-		// TaskDto("new")));
+		getModel().getRootModel().getChildren().add(new TaskPresentationModel(new TaskDto("new")));
 	}
 
 	private void doWithSelectedTask(Consumer<TaskPresentationModel> func) {
