@@ -1,16 +1,13 @@
 package net.d80harri.wr.ui.task;
 
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import net.d80harri.wr.service.model.TaskDto;
 
@@ -93,6 +90,17 @@ public class TaskPresentationModel {
 			child.setParent(this);
 		}
 	}
+
+	public final ObservableList<net.d80harri.wr.ui.task.TaskPresentationModel> getChildren() {
+		return this.children;
+	}
+	
+	public void addChild(int i, TaskPresentationModel child) {
+		if (!this.getChildren().contains(child)) {
+			getChildren().add(i, child);
+			child.setParent(this);
+		}
+	}
 	
 	private BooleanProperty selected = new SimpleBooleanProperty(this, "selected");
 	
@@ -108,13 +116,26 @@ public class TaskPresentationModel {
 		selectedProperty().set(selected);
 	}
 	
+	private BooleanProperty expanded = new SimpleBooleanProperty(this, "expanded");
+	
+	public final BooleanProperty expandedProperty() {
+		return this.expanded;
+	}
+	
+	public final boolean isExpanded() {
+		return this.expandedProperty().get();
+	}
+	
+	public final void setExpanded(final boolean expanded) {
+		this.expandedProperty().set(expanded);
+	}
+	
+	
 	@Override
 	public String toString() {
 		return getTitle() + " " + getChildren().size();
 	}
 
-	public final javafx.collections.ObservableList<net.d80harri.wr.ui.task.TaskPresentationModel> getChildren() {
-		return this.children;
-	}
+
 
 }

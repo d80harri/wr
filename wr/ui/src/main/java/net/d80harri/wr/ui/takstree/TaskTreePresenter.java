@@ -6,6 +6,7 @@ import static org.fxmisc.easybind.EasyBind.subscribe;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -28,9 +29,12 @@ import javafx.util.Callback;
 
 import javax.inject.Inject;
 
+import org.fxmisc.easybind.EasyBind;
+
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
+import net.d80harri.wr.ui.utils.CustomBindings;
 import net.d80harri.wr.ui.utils.DebugUtils;
 
 public class TaskTreePresenter implements Initializable {
@@ -82,13 +86,14 @@ public class TaskTreePresenter implements Initializable {
 
 	private void load() {
 		tree.rootProperty().bind(createTreeItemBinding(this.model));
-		subscribe(
-				select(tree.selectionModelProperty()).selectObject(sm -> sm.selectedItemProperty()),
-				c -> {
-					Platform.runLater(() -> getModel().select(c == null ? null : c.getValue()));
-				});
-		subscribe(select(modelProperty()).selectObject(m -> m.selectedModelProperty()),
-				c -> tree.getSelectionModel().select(findTreeItem(c)));
+		CustomBindings.bindSelectedItemBidirectional(getModel().selectedModelProperty(), tree);
+//		subscribe(
+//				select(tree.selectionModelProperty()).selectObject(sm -> sm.selectedItemProperty()),
+//				c -> {
+//					Platform.runLater(() -> getModel().select(c == null ? null : c.getValue()));
+//				});
+//		subscribe(select(modelProperty()).selectObject(m -> m.selectedModelProperty()),
+//				c -> tree.getSelectionModel().select(findTreeItem(c)));
 		getModel().load(service);
 	}
 	
@@ -129,30 +134,16 @@ public class TaskTreePresenter implements Initializable {
 
 	private ObservableList<TreeItem<TaskPresentationModel>> createTreeItemListBinding(
 			ObservableList<TaskPresentationModel> children) {
-		return new ListBinding<TreeItem<TaskPresentationModel>>() {
-
-			{
-				super.bind(children);
-			}
+		return EasyBind.map(children, new Function<TaskPresentationModel, TreeItem<TaskPresentationModel>>() {
 
 			@Override
-			protected ObservableList<TreeItem<TaskPresentationModel>> computeValue() {
-				ObservableList<TreeItem<TaskPresentationModel>> result = FXCollections
-						.observableArrayList();
-
-				for (TaskPresentationModel child : children) {
-					TreeItem<TaskPresentationModel> childItem = new TreeItem<TaskPresentationModel>(
-							child);
-					
-					Bindings.bindContent(childItem.getChildren(),
-							createTreeItemListBinding(child.getChildren()));
-					
-					result.add(childItem);
-				}
+			public TreeItem<TaskPresentationModel> apply(TaskPresentationModel t) {
+				TreeItem<TaskPresentationModel> result = new TreeItem<>(t);
+				result.expandedProperty().bindBidirectional(t.expandedProperty());
+				Bindings.bindContent(result.getChildren(), createTreeItemListBinding(t.getChildren()));
 				return result;
 			}
-
-		};
+		});
 	}
 
 	@FXML
@@ -209,8 +200,8 @@ public class TaskTreePresenter implements Initializable {
 			if (grandParent != null) {
 				int idxOfParent = grandParent.getChildren().indexOf(
 						s.getParent());
-				grandParent.getChildren().add(idxOfParent + 1, s);
-				s.setSelected(true);
+				grandParent.addChild(idxOfParent + 1, s);
+				this.getModel().select(s);
 			}
 		});
 	}
@@ -220,14 +211,13 @@ public class TaskTreePresenter implements Initializable {
 			int idxOfSelected = s.getParent().getChildren().indexOf(s);
 
 			s.getParent()
-					.getChildren()
-					.add(idxOfSelected + 1,
+					.addChild(idxOfSelected + 1,
 							new TaskPresentationModel(new TaskDto("new")));
 		});
 	}
 
 	private void addRootTask() {
-		getModel().getRootModel().getChildren().add(new TaskPresentationModel(new TaskDto("new")));
+		getModel().getRootModel().addChild(new TaskPresentationModel(new TaskDto("new")));
 	}
 
 	private void doWithSelectedTask(Consumer<TaskPresentationModel> func) {

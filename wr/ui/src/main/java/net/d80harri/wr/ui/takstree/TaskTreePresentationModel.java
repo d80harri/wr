@@ -53,6 +53,8 @@ public class TaskTreePresentationModel {
 		}
 		if (selected != null) {
 			selected.setSelected(true);
+			if (selected.getParent() != null)
+				selected.getParent().setExpanded(true);
 		}
 		this.setSelectedModel(selected);
 	}
