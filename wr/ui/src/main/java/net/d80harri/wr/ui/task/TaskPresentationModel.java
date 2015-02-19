@@ -174,6 +174,7 @@ public class TaskPresentationModel {
 			TaskPresentationModel precessor = getParent().getChildren()
 					.get(idx - 1);
 			precessor.addChild(this);
+			setExpanded(true);
 			setSelected(true);
 		}
 	}

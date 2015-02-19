@@ -22,7 +22,7 @@
   <center>
     <SplitPane dividerPositions="0.5" focusTraversable="true" prefHeight="160.0" prefWidth="200.0">
       <items>
-      	<AnchorPane fx:id="taskTree"/>
+      	<BorderPane fx:id="taskTree"/>
         <!-- <VBox prefHeight="200.0" prefWidth="194.0">
           <children>
           	<TaskView fx:id="taskView" layoutX="5.0" layoutY="4.0">

@@ -12,12 +12,16 @@ import net.d80harri.wr.ui.task.TaskPresentationModel;
 
 public class TaskTreePresentationModel {
 	private final ChangeListener<TaskPresentationModel> selectedModelPropertyChangedListener = new ChangeListener<TaskPresentationModel>() {
-
+		private boolean updating = false;
+		
 		@Override
 		public void changed(
 				ObservableValue<? extends TaskPresentationModel> observable,
 				TaskPresentationModel oldValue,
 				TaskPresentationModel newValue) {
+			if (updating)
+				return;
+			updating = true;
 			if (oldValue != null && oldValue != getRootModel()) {
 				oldValue.update(service);
 			}
@@ -30,7 +34,7 @@ public class TaskTreePresentationModel {
 					newValue.getParent().setExpanded(true);
 				}
 			}
-			
+			updating = false;
 		}
 	};
 	
@@ -117,7 +121,8 @@ public class TaskTreePresentationModel {
 					Boolean oldValue, Boolean newValue) {
 				if (!updating) {
 					updating = true;
-					setSelectedModel(toSelect);
+					if (newValue)
+						setSelectedModel(toSelect);
 					updating = false;
 				}
 			}

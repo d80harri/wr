@@ -20,7 +20,8 @@ public class CustomBindings {
 				if (!updating) {
 					updating = true;
 
-					selectedItem.setValue(newValue.getValue());
+					T selected = newValue == null ? null : newValue.getValue();
+					selectedItem.setValue(selected);
 					
 					updating = false;
 				}
@@ -56,7 +57,8 @@ public class CustomBindings {
 				if (!updating) {
 					updating = true;
 					
-					view.getSelectionModel().select(findItem(view.getRoot(), newValue));
+					TreeItem<T> found = findItem(view.getRoot(), newValue);
+					view.getSelectionModel().select(found);
 					
 					updating = false;
 				}

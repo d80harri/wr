@@ -6,15 +6,15 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import net.d80harri.wr.ui.takstree.TaskTreeView;
 
 public class ApplicationPresenter implements Initializable {
-	@FXML AnchorPane taskTree;
+	@FXML BorderPane taskTree;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		taskTree.getChildren().add(new TaskTreeView().getView());
+		taskTree.setCenter(new TaskTreeView().getView());
 	}
 	
 	@FXML
