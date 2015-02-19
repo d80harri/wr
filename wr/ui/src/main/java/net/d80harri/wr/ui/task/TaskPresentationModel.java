@@ -9,20 +9,23 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
 
 public class TaskPresentationModel {
-
-	public TaskPresentationModel() {
-		
+	private WrService service;
+	
+	public TaskPresentationModel(WrService service) {
+		this.service = service;
 	}
 
-	public TaskPresentationModel(TaskDto task) {
+	public TaskPresentationModel(WrService service, TaskDto task) {
+		this.service = service;
 		setTitle(task.getTitle());
 		id = new SimpleObjectProperty<Long>(task.getId());
 	}
 
-	private ReadOnlyObjectProperty<Long> id = null;
+	private ReadOnlyObjectProperty<Long> id = new SimpleObjectProperty<Long>(this, "id");
 
 	public ReadOnlyObjectProperty<Long> idProperty() {
 		return id;
@@ -130,12 +133,71 @@ public class TaskPresentationModel {
 		this.expandedProperty().set(expanded);
 	}
 	
+	private BooleanProperty deleted = null;
+	
+	public final BooleanProperty deletedProperty() {
+		if (deleted == null) {
+			deleted = new SimpleBooleanProperty(this, "deleted");
+		}
+		return this.deleted;
+	}
+	
+	public final boolean isDeleted() {
+		return this.deletedProperty().get();
+	}
+	
+	public final void setDeleted(final boolean deleted) {
+		this.deletedProperty().set(deleted);
+	}
+	
+	
+	public void update(WrService service) {
+		TaskDto dto = new TaskDto();
+		dto.setTitle(this.getTitle());
+		dto.setId(this.getId());
+		service.updateTask(dto);
+	}
+	
+	public void deleteSubtree() {
+		if (!isDeleted()) {
+			service.deleteSubtree(getId());
+			if (getParent() != null) {
+				getParent().getChildren().remove(this);
+			}
+			setDeleted(true);
+		}
+	}
+
+	public void indentTask() {
+		int idx = getParent().getChildren().indexOf(this);
+		if (idx != 0) {
+			TaskPresentationModel precessor = getParent().getChildren()
+					.get(idx - 1);
+			precessor.addChild(this);
+			setSelected(true);
+		}
+	}
+	
+	public void outdentTask() {
+		TaskPresentationModel grandParent = getParent().getParent();
+		if (grandParent != null) {
+			int idxOfParent = grandParent.getChildren().indexOf(
+					getParent());
+			grandParent.addChild(idxOfParent + 1, this);
+			setSelected(true);
+		}
+	}
+	
+	public void addSibling(TaskPresentationModel taskPresentationModel) {
+		int idxOfSelected = this.getParent().getChildren().indexOf(this);
+
+		this.getParent()
+				.addChild(idxOfSelected + 1, taskPresentationModel);
+	}
 	
 	@Override
 	public String toString() {
 		return getTitle() + " " + getChildren().size();
 	}
-
-
 
 }

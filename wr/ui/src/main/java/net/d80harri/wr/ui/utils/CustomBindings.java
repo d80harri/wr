@@ -1,8 +1,11 @@
 package net.d80harri.wr.ui.utils;
 
+import org.fxmisc.easybind.EasyBind;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 
@@ -16,13 +19,31 @@ public class CustomBindings {
 					TreeItem<T> oldValue, TreeItem<T> newValue) {
 				if (!updating) {
 					updating = true;
-					
+
 					selectedItem.setValue(newValue.getValue());
 					
 					updating = false;
 				}
 			}
 		});
+	}
+	
+	public static <T> void bindSelectedItem(final Property<T> selectedItem, final SelectionModel<T> selectionModel) {
+		selectedItem.bind(selectionModel.selectedItemProperty());
+//		selectedTreeItem.addListener(new ChangeListener<TreeItem<T>>() {
+//			private boolean updating = false;
+//			@Override
+//			public void changed(ObservableValue<? extends TreeItem<T>> observable,
+//					TreeItem<T> oldValue, TreeItem<T> newValue) {
+//				if (!updating) {
+//					updating = true;
+//
+//					selectedItem.setValue(newValue.getValue());
+//					
+//					updating = false;
+//				}
+//			}
+//		});
 	}
 	
 	public static <T> ChangeListener<T> bindSelectedItem(TreeTableView<T> view, final ObservableValue<T> selectedItem) {
@@ -48,7 +69,7 @@ public class CustomBindings {
 	}
 	
 	public static <T> void bindSelectedItemBidirectional(final Property<T> selectedItem, TreeTableView<T> view) {
-		bindSelectedItem(selectedItem, view.rootProperty());
+		bindSelectedItem(selectedItem, EasyBind.select(view.selectionModelProperty()).selectObject(sm -> sm.selectedItemProperty()));
 		bindSelectedItem(view, selectedItem);
 	}
 	
