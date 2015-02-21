@@ -2,15 +2,14 @@ package net.d80harri.wr.ui.takstree;
 
 import java.util.List;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
+import net.d80harri.wr.ui.core.TreePresentationModel;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
 
-public class TaskTreePresentationModel {
+public class TaskTreePresentationModel extends TreePresentationModel<TaskPresentationModel> {
 	private final ChangeListener<TaskPresentationModel> selectedModelPropertyChangedListener = new ChangeListener<TaskPresentationModel>() {
 		private boolean updating = false;
 		
@@ -38,8 +37,6 @@ public class TaskTreePresentationModel {
 		}
 	};
 	
-	private ObjectProperty<TaskPresentationModel> selectedModel = new SimpleObjectProperty<TaskPresentationModel>(this, "selectedModel", null);
-
 	private WrService service;
 	
 	public TaskTreePresentationModel(WrService service) {
@@ -52,55 +49,10 @@ public class TaskTreePresentationModel {
 		
 	}
 
-	public final ObjectProperty<TaskPresentationModel> selectedModelProperty() {
-		return this.selectedModel;
-	}
-
-	public final net.d80harri.wr.ui.task.TaskPresentationModel getSelectedModel() {
-		return this.selectedModelProperty().get();
-	}
-
-	public final void setSelectedModel(
-			final net.d80harri.wr.ui.task.TaskPresentationModel selectedModel) {
-		this.selectedModelProperty().set(selectedModel);
-	}
-
-	
-	private ObjectProperty<TaskPresentationModel> rootModel = null;
-	
-	public final ObjectProperty<TaskPresentationModel> rootModelProperty() {
-		if (rootModel == null) {
-			rootModel = new SimpleObjectProperty<TaskPresentationModel>(this, "rootModel", new TaskPresentationModel(this.service));
-		}
-		return this.rootModel;
-	}
-
-	public final net.d80harri.wr.ui.task.TaskPresentationModel getRootModel() {
-		return this.rootModelProperty().get();
-	}
-
-	public final void setRootModel(
-			final net.d80harri.wr.ui.task.TaskPresentationModel rootModel) {
-		this.rootModelProperty().set(rootModel);
-	}
-
 	public void load(WrService service) {
 		this.setRootModel(createRootModel(service.getAllTrees()));
 	}
-	
-	public void select(TaskPresentationModel selected) {
-		if (this.getSelectedModel() != null) {
-			this.getSelectedModel().setSelected(false);			
-		}
-		if (selected != null) {
-			selected.setSelected(true);
-			if (selected.getParent() != null)
-				selected.getParent().setExpanded(true);
-		}
-		this.setSelectedModel(selected);
-	}
-	
-	
+		
 	public TaskPresentationModel createRootModel(List<TaskDto> rootDtos) {
 		TaskPresentationModel result = new TaskPresentationModel(this.service);
 		

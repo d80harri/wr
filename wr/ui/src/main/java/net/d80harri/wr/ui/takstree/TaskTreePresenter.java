@@ -133,14 +133,14 @@ public class TaskTreePresenter implements Initializable {
 			@Override
 			protected TreeItem<TaskPresentationModel> computeValue() {
 				ObservableValue<TaskPresentationModel> rootModel = select(model).selectObject(m -> m.rootModelProperty());
-				
-				TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>();
-				result.valueProperty().bind(rootModel);
-				
-				Bindings.bindContent(result.getChildren(),
-						createTreeItemListBinding(rootModel.getValue()
-								.getChildren()));
-				
+					TreeItem<TaskPresentationModel> result = new TreeItem<TaskPresentationModel>();
+					result.valueProperty().bind(rootModel);
+					
+				if (rootModel.getValue() != null) {
+					Bindings.bindContent(result.getChildren(),
+							createTreeItemListBinding(rootModel.getValue()
+									.getChildren()));
+				}
 				return result;
 			}
 			
