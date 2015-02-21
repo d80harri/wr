@@ -1,4 +1,4 @@
-package net.d80harri.wr.ui.utils;
+package net.d80harri.wr.ui.core;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,12 +19,12 @@ public class ChangeManager<T> {
 		return this.state;
 	}
 
-	public final net.d80harri.wr.ui.utils.ChangeManager.State getState() {
+	public final net.d80harri.wr.ui.core.ChangeManager.State getState() {
 		return this.stateProperty().getValue();
 	}
 
 	public final void setState(
-			final net.d80harri.wr.ui.utils.ChangeManager.State state) {
+			final net.d80harri.wr.ui.core.ChangeManager.State state) {
 		this.stateProperty().setValue(state);
 	}
 
