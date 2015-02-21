@@ -11,8 +11,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
+import net.d80harri.wr.ui.utils.ChangeManager;
 
 public class TaskPresentationModel {
+	private ChangeManager<TaskPresentationModel> changeManager = new ChangeManager<TaskPresentationModel>(this);
+	
 	private WrService service;
 	
 	public TaskPresentationModel(WrService service) {
@@ -21,10 +24,15 @@ public class TaskPresentationModel {
 
 	public TaskPresentationModel(WrService service, TaskDto task) {
 		this.service = service;
+		getChangeManager().setState(ChangeManager.State.UpToDate);
 		setTitle(task.getTitle());
 		id = new SimpleObjectProperty<Long>(task.getId());
 	}
 
+	public ChangeManager<TaskPresentationModel> getChangeManager() {
+		return changeManager;
+	}
+	
 	private ReadOnlyObjectProperty<Long> id = new SimpleObjectProperty<Long>(this, "id");
 
 	public ReadOnlyObjectProperty<Long> idProperty() {
@@ -131,25 +139,7 @@ public class TaskPresentationModel {
 	
 	public final void setExpanded(final boolean expanded) {
 		this.expandedProperty().set(expanded);
-	}
-	
-	private BooleanProperty deleted = null;
-	
-	public final BooleanProperty deletedProperty() {
-		if (deleted == null) {
-			deleted = new SimpleBooleanProperty(this, "deleted");
-		}
-		return this.deleted;
-	}
-	
-	public final boolean isDeleted() {
-		return this.deletedProperty().get();
-	}
-	
-	public final void setDeleted(final boolean deleted) {
-		this.deletedProperty().set(deleted);
-	}
-	
+	}	
 	
 	public void update(WrService service) {
 		TaskDto dto = new TaskDto();
@@ -159,12 +149,12 @@ public class TaskPresentationModel {
 	}
 	
 	public void deleteSubtree() {
-		if (!isDeleted()) {
+		if (getChangeManager().getState() != ChangeManager.State.Deleted) {
 			service.deleteSubtree(getId());
 			if (getParent() != null) {
 				getParent().getChildren().remove(this);
 			}
-			setDeleted(true);
+			getChangeManager().setState(ChangeManager.State.Deleted);
 		}
 	}
 
