@@ -22,7 +22,7 @@ public class TaskTreePresentationModel extends TreePresentationModel<TaskPresent
 				return;
 			updating = true;
 			if (oldValue != null && oldValue != getRootModel()) {
-				oldValue.update(service);
+				oldValue.update();
 			}
 			if (oldValue != null) {
 				oldValue.setSelected(false);
