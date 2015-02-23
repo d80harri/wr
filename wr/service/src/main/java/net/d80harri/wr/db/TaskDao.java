@@ -103,4 +103,61 @@ public class TaskDao {
 		
 		return (Task) session.get(Task.class, id);
 	}
+
+	public void moveSubtree(long id, long newParentId) {
+		Session session = SessionHandler.getInstance().getSession();
+		
+		Task newParent = getTaskById(newParentId);
+		Task origin = getTaskById(id);
+		
+		if (newParent.getRight() < origin.getLeft()) {
+			session.createQuery(
+					"update Task t set                                                       \n"
+					+ "t.left = t.left + case                                                \n"
+					+ "    when t.left between :origin_left and :origin_right then           \n"
+					+ "        :new_parent_right_MINUS_origin_left                           \n"
+					+ "    when t.left between :new_parent_right and :origin_left -1 then    \n"
+					+ "        :origin_right_MINUS_origin_left_plus_one                      \n"
+					+ "    else 0 end,                                                       \n"
+					+ "t.right = t.right + case                                              \n"
+					+ "    when t.right between :origin_left and :origin_right then          \n"
+					+ "        :new_parent_right_MINUS_origin_left                           \n"
+					+ "    when t.right between :new_parent_right and :origin_left -1 then   \n"
+					+ "        :origin_right_MINUS_origin_left_plus_one                      \n"
+					+ "    else 0 end                                                        \n"
+					+ "where t.left between :new_parent_right and :origin_right              \n"
+					+ "    or t.right between :new_parent_right and :origin_right            \n")
+					.setLong("origin_left", origin.getLeft())
+					.setLong("origin_right", origin.getRight())
+					.setLong("new_parent_right", newParent.getRight())
+					.setLong("new_parent_right_MINUS_origin_left", newParent.getRight() - origin.getLeft())
+					.setLong("origin_right_MINUS_origin_left_plus_one", origin.getRight() - origin.getLeft() + 1)
+					.executeUpdate();
+		} else if (newParent.getRight() > origin.getRight()) {
+			session.createQuery(
+					"update Task t set                                                             \n"
+					+ "t.left = t.left + case                                                      \n"
+					+ "    when t.left between :origin_left and :origin_right then                 \n"
+					+ "        :new_parent_right_MINUS_origin_right_MINUS_one                      \n"
+					+ "    when t.left between :origin_right + 1 and :new_parent_right - 1 then    \n"
+					+ "        :origin_left_MINUS_origin_right_MINUS_one                           \n"
+					+ "    else 0 end,                                                             \n"
+					+ "t.right = t.right + case                                                    \n"
+					+ "    when t.right between :origin_left and :origin_right then                \n"
+					+ "        :new_parent_right_MINUS_origin_right_MINUS_one                      \n"
+					+ "    when t.right between :origin_right + 1 and :new_parent_right - 1 then   \n"
+					+ "        :origin_left_MINUS_origin_right_MINUS_one                           \n"
+					+ "    else 0 end                                                              \n"
+					+ "where t.left between :origin_left and :new_parent_right                     \n"
+					+ "    or t.right between :origin_left and :new_parent_right                   \n")
+					.setLong("origin_left", origin.getLeft())
+					.setLong("origin_right", origin.getRight())
+					.setLong("new_parent_right", newParent.getRight())
+					.setLong("new_parent_right_MINUS_origin_right_MINUS_one", (newParent.getRight() - origin.getRight() - 1L))
+					.setLong("origin_left_MINUS_origin_right_MINUS_one", (origin.getLeft() - origin.getRight() - 1L))
+					.executeUpdate();
+		} else {
+			throw new IllegalStateException("Cannot move a subtree to itself, infinite recursion");
+		}
+	}
 }

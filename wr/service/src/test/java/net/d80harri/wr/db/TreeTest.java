@@ -1,9 +1,9 @@
 package net.d80harri.wr.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import net.d80harri.wr.DBUnitTest;
 import net.d80harri.wr.db.model.Task;
-import net.d80harri.wr.service.WrService;
 
 import org.junit.Test;
 
@@ -82,4 +82,82 @@ public class TreeTest extends DBUnitTest {
 		assertThat(dao.getSubtree(1)).hasSize(0);
 	}
 	
+	@Test
+	public void moveSubtreeRight() {
+		dao.moveSubtree(6, 4);
+		
+		assertThat(dao.getSubtree(1)).hasSize(13);
+		assertThat(dao.getSubtree(2)).hasSize(4);
+		assertThat(dao.getSubtree(3)).hasSize(5);
+		assertThat(dao.getSubtree(4)).hasSize(3);
+		assertThat(dao.getSubtree(5)).hasSize(3);
+		assertThat(dao.getSubtree(6)).hasSize(2);
+		assertThat(dao.getSubtree(7)).hasSize(1);
+		assertThat(dao.getSubtree(8)).hasSize(1);
+		assertThat(dao.getSubtree(9)).hasSize(1);
+		assertThat(dao.getSubtree(10)).hasSize(1);
+		assertThat(dao.getSubtree(11)).hasSize(1);
+		assertThat(dao.getSubtree(12)).hasSize(1);
+		assertThat(dao.getSubtree(13)).hasSize(1);
+	}
+	
+	@Test
+	public void moveSubtreeLeft() {
+		dao.moveSubtree(6, 5);
+		
+		assertThat(dao.getSubtree(1)).hasSize(13);
+		assertThat(dao.getSubtree(2)).hasSize(6);
+		assertThat(dao.getSubtree(3)).hasSize(5);
+		assertThat(dao.getSubtree(4)).hasSize(1);
+		assertThat(dao.getSubtree(5)).hasSize(5);
+		assertThat(dao.getSubtree(6)).hasSize(2);
+		assertThat(dao.getSubtree(7)).hasSize(1);
+		assertThat(dao.getSubtree(8)).hasSize(1);
+		assertThat(dao.getSubtree(9)).hasSize(1);
+		assertThat(dao.getSubtree(10)).hasSize(1);
+		assertThat(dao.getSubtree(11)).hasSize(1);
+		assertThat(dao.getSubtree(12)).hasSize(1);
+		assertThat(dao.getSubtree(13)).hasSize(1);
+	}
+	
+	@Test
+	public void dontReallyMoveSubtree() {
+		dao.moveSubtree(3, 1);
+		
+		assertThat(dao.getSubtree(1)).hasSize(13);
+		assertThat(dao.getSubtree(2)).hasSize(6);
+		assertThat(dao.getSubtree(3)).hasSize(5);
+		assertThat(dao.getSubtree(4)).hasSize(1);
+		assertThat(dao.getSubtree(5)).hasSize(3);
+		assertThat(dao.getSubtree(6)).hasSize(2);
+		assertThat(dao.getSubtree(7)).hasSize(1);
+		assertThat(dao.getSubtree(8)).hasSize(1);
+		assertThat(dao.getSubtree(9)).hasSize(1);
+		assertThat(dao.getSubtree(10)).hasSize(1);
+		assertThat(dao.getSubtree(11)).hasSize(1);
+		assertThat(dao.getSubtree(12)).hasSize(1);
+		assertThat(dao.getSubtree(13)).hasSize(1);
+	}
+	
+	@Test
+	public void tryMoveSubreeRecursive() {
+		try{
+			dao.moveSubtree(2, 8);
+			fail("Exception should have been thrown");
+		} catch (IllegalStateException ex) {
+			assertThat(dao.getSubtree(1)).hasSize(13);
+			assertThat(dao.getSubtree(2)).hasSize(6);
+			assertThat(dao.getSubtree(3)).hasSize(5);
+			assertThat(dao.getSubtree(4)).hasSize(1);
+			assertThat(dao.getSubtree(5)).hasSize(3);
+			assertThat(dao.getSubtree(6)).hasSize(2);
+			assertThat(dao.getSubtree(7)).hasSize(1);
+			assertThat(dao.getSubtree(8)).hasSize(1);
+			assertThat(dao.getSubtree(9)).hasSize(1);
+			assertThat(dao.getSubtree(10)).hasSize(1);
+			assertThat(dao.getSubtree(11)).hasSize(1);
+			assertThat(dao.getSubtree(12)).hasSize(1);
+			assertThat(dao.getSubtree(13)).hasSize(1);
+		} 
+	}
 }

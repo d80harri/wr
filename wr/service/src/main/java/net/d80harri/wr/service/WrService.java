@@ -119,4 +119,9 @@ public class WrService {
 		Task task = dal.getTaskById(id);
 		return mapper.map(task, TaskDto.class);
 	}
+	
+	@Transactional
+	public void moveSubtree(long id, long newParentId) {
+		dal.moveSubtree(id, newParentId);
+	}
 }
