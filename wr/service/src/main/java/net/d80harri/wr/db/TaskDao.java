@@ -104,13 +104,23 @@ public class TaskDao {
 		return (Task) session.get(Task.class, id);
 	}
 
-	public void moveSubtree(long id, long newParentId) {
+	public void moveSubtree(long id, Long newParentId) {
 		Session session = SessionHandler.getInstance().getSession();
+		long parentRight = -1;
 		
-		Task newParent = getTaskById(newParentId);
+		if (newParentId == null) {
+			Long max = (Long) session.createQuery("select max(t.right) from Task t")
+					.list().iterator().next();
+			if (max == null) max = 0L;
+			parentRight = max+1;
+		} else {
+			Task newParent = getTaskById(newParentId);
+			parentRight = newParent.getRight();
+		}
+		
 		Task origin = getTaskById(id);
 		
-		if (newParent.getRight() < origin.getLeft()) {
+		if (parentRight < origin.getLeft()) {
 			session.createQuery(
 					"update Task t set                                                       \n"
 					+ "t.left = t.left + case                                                \n"
@@ -129,11 +139,11 @@ public class TaskDao {
 					+ "    or t.right between :new_parent_right and :origin_right            \n")
 					.setLong("origin_left", origin.getLeft())
 					.setLong("origin_right", origin.getRight())
-					.setLong("new_parent_right", newParent.getRight())
-					.setLong("new_parent_right_MINUS_origin_left", newParent.getRight() - origin.getLeft())
+					.setLong("new_parent_right", parentRight)
+					.setLong("new_parent_right_MINUS_origin_left", parentRight - origin.getLeft())
 					.setLong("origin_right_MINUS_origin_left_plus_one", origin.getRight() - origin.getLeft() + 1)
 					.executeUpdate();
-		} else if (newParent.getRight() > origin.getRight()) {
+		} else if (parentRight > origin.getRight()) {
 			session.createQuery(
 					"update Task t set                                                             \n"
 					+ "t.left = t.left + case                                                      \n"
@@ -152,8 +162,8 @@ public class TaskDao {
 					+ "    or t.right between :origin_left and :new_parent_right                   \n")
 					.setLong("origin_left", origin.getLeft())
 					.setLong("origin_right", origin.getRight())
-					.setLong("new_parent_right", newParent.getRight())
-					.setLong("new_parent_right_MINUS_origin_right_MINUS_one", (newParent.getRight() - origin.getRight() - 1L))
+					.setLong("new_parent_right", parentRight)
+					.setLong("new_parent_right_MINUS_origin_right_MINUS_one", (parentRight - origin.getRight() - 1L))
 					.setLong("origin_left_MINUS_origin_right_MINUS_one", (origin.getLeft() - origin.getRight() - 1L))
 					.executeUpdate();
 		} else {

@@ -84,7 +84,7 @@ public class TreeTest extends DBUnitTest {
 	
 	@Test
 	public void moveSubtreeRight() {
-		dao.moveSubtree(6, 4);
+		dao.moveSubtree(6, 4L);
 		
 		assertThat(dao.getSubtree(1)).hasSize(13);
 		assertThat(dao.getSubtree(2)).hasSize(4);
@@ -103,7 +103,7 @@ public class TreeTest extends DBUnitTest {
 	
 	@Test
 	public void moveSubtreeLeft() {
-		dao.moveSubtree(6, 5);
+		dao.moveSubtree(6, 5L);
 		
 		assertThat(dao.getSubtree(1)).hasSize(13);
 		assertThat(dao.getSubtree(2)).hasSize(6);
@@ -122,7 +122,7 @@ public class TreeTest extends DBUnitTest {
 	
 	@Test
 	public void dontReallyMoveSubtree() {
-		dao.moveSubtree(3, 1);
+		dao.moveSubtree(3, 1L);
 		
 		assertThat(dao.getSubtree(1)).hasSize(13);
 		assertThat(dao.getSubtree(2)).hasSize(6);
@@ -142,7 +142,7 @@ public class TreeTest extends DBUnitTest {
 	@Test
 	public void tryMoveSubreeRecursive() {
 		try{
-			dao.moveSubtree(2, 8);
+			dao.moveSubtree(2, 8L);
 			fail("Exception should have been thrown");
 		} catch (IllegalStateException ex) {
 			assertThat(dao.getSubtree(1)).hasSize(13);
@@ -159,5 +159,24 @@ public class TreeTest extends DBUnitTest {
 			assertThat(dao.getSubtree(12)).hasSize(1);
 			assertThat(dao.getSubtree(13)).hasSize(1);
 		} 
+	}
+	
+	@Test
+	public void moveSubtreeToRoot() {
+		dao.moveSubtree(2, null);
+		
+		assertThat(dao.getSubtree(1)).hasSize(7);
+		assertThat(dao.getSubtree(2)).hasSize(6);
+		assertThat(dao.getSubtree(3)).hasSize(5);
+		assertThat(dao.getSubtree(4)).hasSize(1);
+		assertThat(dao.getSubtree(5)).hasSize(3);
+		assertThat(dao.getSubtree(6)).hasSize(2);
+		assertThat(dao.getSubtree(7)).hasSize(1);
+		assertThat(dao.getSubtree(8)).hasSize(1);
+		assertThat(dao.getSubtree(9)).hasSize(1);
+		assertThat(dao.getSubtree(10)).hasSize(1);
+		assertThat(dao.getSubtree(11)).hasSize(1);
+		assertThat(dao.getSubtree(12)).hasSize(1);
+		assertThat(dao.getSubtree(13)).hasSize(1);
 	}
 }

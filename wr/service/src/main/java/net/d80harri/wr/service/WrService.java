@@ -121,7 +121,7 @@ public class WrService {
 	}
 	
 	@Transactional
-	public void moveSubtree(long id, long newParentId) {
+	public void moveSubtree(long id, Long newParentId) {
 		dal.moveSubtree(id, newParentId);
 	}
 }
