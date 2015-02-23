@@ -17,9 +17,12 @@ public class IndentTaskCommand extends PresentationModelCommand<Void> {
 	@Override
 	protected Void call() throws Exception {
 		int idx = model.getParent().getChildren().indexOf(model);
-		if (idx != 0) {
+		if (idx != 0) {			
 			TaskPresentationModel precessor = model.getParent().getChildren()
 					.get(idx - 1);
+			
+			service.moveSubtree(model.getId(), precessor.getId());
+			
 			precessor.addChild(model);
 			model.setExpanded(true);
 			model.setSelected(true);

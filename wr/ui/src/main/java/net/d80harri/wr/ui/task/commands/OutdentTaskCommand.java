@@ -19,6 +19,9 @@ public class OutdentTaskCommand extends PresentationModelCommand<Void> {
 		if (grandParent != null) {
 			int idxOfParent = grandParent.getChildren().indexOf(
 					model.getParent());
+			
+			service.moveSubtree(model.getId(), grandParent.getId());
+			
 			grandParent.addChild(idxOfParent + 1, model);
 			model.setSelected(true);
 		}
