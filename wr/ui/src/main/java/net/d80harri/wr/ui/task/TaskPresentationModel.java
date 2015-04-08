@@ -108,58 +108,31 @@ public class TaskPresentationModel
 		this.updateCommandProperty().set(updateCommand);
 	}
 
-	private ObjectProperty<PresentationModelCommand<Void>> deleteSubtreeCommand;
-	
-	public final ObjectProperty<PresentationModelCommand<Void>> deleteSubtreeCommandProperty() {
+	private PresentationModelCommand<Void> deleteSubtreeCommand;
+
+	public final PresentationModelCommand<Void> getDeleteSubtreeCommand() {
 		if (this.deleteSubtreeCommand == null) {
-			deleteSubtreeCommand = new SimpleObjectProperty<PresentationModelCommand<Void>>(this, "deleteSubtreeCommand", new DeleteTaskSubtreeCommand());
+			this.deleteSubtreeCommand = new DeleteTaskSubtreeCommand();
 		}
 		return this.deleteSubtreeCommand;
 	}
-
-	public final PresentationModelCommand<Void> getDeleteSubtreeCommand() {
-		return this.deleteSubtreeCommandProperty().get();
-	}
-
-	public final void setDeleteSubtreeCommand(
-			final PresentationModelCommand<Void> deleteSubtreeCommand) {
-		this.deleteSubtreeCommandProperty().set(deleteSubtreeCommand);
-	}
 	
-	private ObjectProperty<PresentationModelCommand<Void>> indentTaskCommand;
-	
-	public final ObjectProperty<PresentationModelCommand<Void>> indentTaskCommandProperty() {
-		if (indentTaskCommand == null) {
-			indentTaskCommand = new SimpleObjectProperty<PresentationModelCommand<Void>>(this, "indentTaskCommand", new IndentTaskCommand(this.service, this));
-		}
-		return this.indentTaskCommand;
-	}
+	private PresentationModelCommand<Void> indentTaskCommand;
 
 	public final PresentationModelCommand<Void> getIndentTaskCommand() {
-		return this.indentTaskCommandProperty().get();
+		if (indentTaskCommand == null) {
+			indentTaskCommand = new IndentTaskCommand(this.service, this);
+		}
+		return indentTaskCommand;
 	}
 
-	public final void setIndentTaskCommand(
-			final PresentationModelCommand<java.lang.Void> indentTaskCommand) {
-		this.indentTaskCommandProperty().set(indentTaskCommand);
-	}
+	private PresentationModelCommand<Void> outdentTaskCommand;
 
-	private ObjectProperty<PresentationModelCommand<Void>> outdentTaskCommand;
-	
-	public final ObjectProperty<PresentationModelCommand<Void>> outdentTaskCommandProperty() {
-		if (outdentTaskCommand == null) {
-			outdentTaskCommand = new SimpleObjectProperty<PresentationModelCommand<Void>>(this, "outdentTaskCommand", new OutdentTaskCommand(this.service, this));
+	public final PresentationModelCommand<Void> getOutdentTaskCommand() {
+		if (this.outdentTaskCommand == null) {
+			this.outdentTaskCommand = new OutdentTaskCommand(this.service, this);
 		}
 		return this.outdentTaskCommand;
-	}
-
-	public final net.d80harri.wr.ui.core.PresentationModelCommand<java.lang.Void> getOutdentTaskCommand() {
-		return this.outdentTaskCommandProperty().get();
-	}
-
-	public final void setOutdentTaskCommand(
-			final net.d80harri.wr.ui.core.PresentationModelCommand<java.lang.Void> outdentTaskCommand) {
-		this.outdentTaskCommandProperty().set(outdentTaskCommand);
 	}
 	
 	public void update() {

@@ -11,6 +11,7 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -100,6 +101,14 @@ public class TaskTreePresenter implements Initializable {
 	private void load() {
 		tree.rootProperty().bind(createTreeItemBinding(this.modelProperty()));
 		CustomBindings.bindSelectedItemBidirectional(getModel().selectedModelProperty(), tree);
+		tree.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue) {
+				tree.edit((Integer)newValue, titleColumn);
+			}
+		});
 		getModel().load(service);
 	}
 

@@ -8,6 +8,7 @@ import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
 import net.d80harri.wr.ui.core.TreePresentationModel;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
+import net.d80harri.wr.ui.task.commands.CreateTaskPresentationModelCommand;
 
 public class TaskTreePresentationModel extends TreePresentationModel<TaskPresentationModel> {
 	private final ChangeListener<TaskPresentationModel> selectedModelPropertyChangedListener = new ChangeListener<TaskPresentationModel>() {
@@ -85,6 +86,14 @@ public class TaskTreePresentationModel extends TreePresentationModel<TaskPresent
 		return result;
 	}
 
+	private CreateTaskPresentationModelCommand createTaskCommand;
+	
+	public CreateTaskPresentationModelCommand getCreateTaskCommand() {
+		if (createTaskCommand == null) {
+			createTaskCommand = new CreateTaskPresentationModelCommand(this.service, s -> setSelectedModel(s));
+		}
+		return createTaskCommand;
+	}
 	public void addRootTask() {
 		getRootModel().addChild(createModel(new TaskDto("new")));
 	}
