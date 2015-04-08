@@ -23,7 +23,7 @@ public class TaskTreePresentationModel extends TreePresentationModel<TaskPresent
 				return;
 			updating = true;
 			if (oldValue != null && oldValue != getRootModel()) {
-				oldValue.update();
+				oldValue.getUpdateCommand().start();
 			}
 			if (oldValue != null) {
 				oldValue.setSelected(false);
@@ -98,19 +98,4 @@ public class TaskTreePresentationModel extends TreePresentationModel<TaskPresent
 		getRootModel().addChild(createModel(new TaskDto("new")));
 	}
 
-	public void addSiblingToSelected() {
-		getSelectedModel().addSibling(createModel(new TaskDto("new")));
-	}
-
-	public void outdentSelectedTask() {
-		getSelectedModel().outdentTask();
-	}
-
-	public void indentSelectedTask() {
-		getSelectedModel().indentTask();
-	}
-
-	public void deleteSelectedSubtree() {
-		getSelectedModel().deleteSubtree();
-	}
 }

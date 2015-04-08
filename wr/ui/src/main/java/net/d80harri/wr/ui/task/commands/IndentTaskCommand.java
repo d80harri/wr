@@ -18,7 +18,7 @@ public class IndentTaskCommand extends PresentationModelCommand<Void> {
 	@Override
 	protected Void call() throws Exception {
 		if (model.getChangeManager().getState() == ChangeManager.State.UpToDate){
-			model.update();
+			model.getUpdateCommand().start();
 		}
 		
 		int idx = model.getParent().getChildren().indexOf(model);

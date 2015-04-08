@@ -2,6 +2,7 @@ package net.d80harri.wr.ui.task.commands;
 
 import net.d80harri.wr.service.WrService;
 import net.d80harri.wr.service.model.TaskDto;
+import net.d80harri.wr.ui.core.ChangeManager;
 import net.d80harri.wr.ui.core.PresentationModelCommand;
 import net.d80harri.wr.ui.task.TaskPresentationModel;
 
@@ -16,10 +17,12 @@ public class UpdateTaskCommand extends PresentationModelCommand<Void> {
 
 	@Override
 	protected Void call() throws Exception {
-		TaskDto dto = new TaskDto();
-		dto.setTitle(model.getTitle());
-		dto.setId(model.getId());
-		service.updateTask(dto);
+		if (model.getChangeManager().getState() == ChangeManager.State.UpToDate) {
+			TaskDto dto = new TaskDto();
+			dto.setTitle(model.getTitle());
+			dto.setId(model.getId());
+			service.updateTask(dto);
+		}
 		return null;
 	}
 

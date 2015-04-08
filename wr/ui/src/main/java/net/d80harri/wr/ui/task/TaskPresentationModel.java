@@ -12,6 +12,7 @@ import net.d80harri.wr.service.model.TaskDto;
 import net.d80harri.wr.ui.core.ChangeManager;
 import net.d80harri.wr.ui.core.PresentationModelCommand;
 import net.d80harri.wr.ui.core.TreeItemPresentationModel;
+import net.d80harri.wr.ui.task.commands.CreateTaskPresentationModelCommand;
 import net.d80harri.wr.ui.task.commands.DeleteTaskSubtreeCommand;
 import net.d80harri.wr.ui.task.commands.IndentTaskCommand;
 import net.d80harri.wr.ui.task.commands.OutdentTaskCommand;
@@ -134,32 +135,10 @@ public class TaskPresentationModel
 		}
 		return this.outdentTaskCommand;
 	}
-	
-	public void update() {
-		getUpdateCommand().start();
-	}
-
-	public void deleteSubtree() {
-		getDeleteSubtreeCommand().start();
-	}
-
-	public void indentTask() {
-		getIndentTaskCommand().start();
-	}
-
-	public void outdentTask() {
-		getOutdentTaskCommand().start();
-	}
-
-	public void addSibling(TaskPresentationModel taskPresentationModel) {
-		int idxOfSelected = this.getParent().getChildren().indexOf(this);
-
-		this.getParent().addChild(idxOfSelected + 1, taskPresentationModel);
-	}
 
 	@Override
 	public String toString() {
 		return getTitle() + " " + getChildren().size();
 	}
-
+	
 }

@@ -174,19 +174,23 @@ public class TaskTreePresenter implements Initializable {
 	private void onKeyPressedInTable(KeyEvent evt) {
 		switch (evt.getCode()) {
 		case ENTER:
-			getModel().addSiblingToSelected();
+			getModel().getCreateTaskCommand().start();
 			evt.consume();
 			break;
-		case TAB:
-			if (evt.isShiftDown()) {
-				getModel().outdentSelectedTask();
-			} else {
-				getModel().indentSelectedTask();
+		case RIGHT:
+			if (evt.isControlDown()) {				
+				getModel().getSelectedModel().getIndentTaskCommand().start();
+			}
+			evt.consume();
+			break;
+		case LEFT:
+			if (evt.isControlDown()) {
+				getModel().getSelectedModel().getOutdentTaskCommand().start();
 			}
 			evt.consume();
 			break;
 		case DELETE:
-			getModel().deleteSelectedSubtree();
+			getModel().getSelectedModel().getDeleteSubtreeCommand().start();
 			evt.consume();
 			break;
 		default: // nothing to do
